@@ -1,5 +1,6 @@
 from pathlib import Path
 import csv
+import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
 import logging
 from .question import Question, MultiChoiceQuest, TrueFalseQuest
@@ -98,7 +99,7 @@ class Exam:
         """Print in PDF all the questions and correction
         """
         if shuffle:
-            self.shuffle()
+            self.answers_shuffle()
 
         questions_serialized = SerializeExam(self.questions)
 
@@ -123,9 +124,12 @@ class Exam:
             )
             interface.build()
 
-    def shuffle(self):
+    def answers_shuffle(self):
         for question in self._questions:
             question.shuffle()
+
+    def questions_shuffle(self):
+        random.shuffle(self._questions)
 
     def __str__(self) -> str:
         output: List[str] = []

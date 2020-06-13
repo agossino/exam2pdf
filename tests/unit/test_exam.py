@@ -17,6 +17,19 @@ def fd_input(prompt):
         return stdin.readline()
 
 
+@pytest.fixture
+def fake_exam():
+    q1, q2, q3, q4, q5 = (
+        quest2pdf.Question("q1 text"),
+        quest2pdf.Question("q2 text"),
+        quest2pdf.Question("q3 text"),
+        quest2pdf.Question("q4 text"),
+        quest2pdf.Question("q5 text")
+    )
+
+    return quest2pdf.Exam(q1, q2, q3, q4, q5)
+
+
 def test_exam():
     """test Exam with no args
     """
@@ -58,8 +71,8 @@ def test_exam_questions_setter1():
     """test question set; question added before overwritten
     """
     q1, q2 = (
-        quest2pdf.question.Question("q1 text", "q1 image"),
-        quest2pdf.question.Question("q2 text", "q2 image"),
+        quest2pdf.Question("q1 text", "q1 image"),
+        quest2pdf.Question("q2 text", "q2 image"),
     )
     ex = quest2pdf.Exam()
     ex.add_question(q1)
@@ -92,13 +105,13 @@ def test_exam_add_path_parent1(tmp_path):
     image = Path("images/image.png")
     file_path = tmp_path / "A.txt"
     file_path.touch()
-    q1 = quest2pdf.question.MultiChoiceQuest("q1 text", "")
+    q1 = quest2pdf.MultiChoiceQuest("q1 text", "")
     q1.answers = (
-        quest2pdf.question.MultiChoiceAnswer("a1 text", image),
-        quest2pdf.question.MultiChoiceAnswer("a2 text", image),
+        quest2pdf.MultiChoiceAnswer("a1 text", image),
+        quest2pdf.MultiChoiceAnswer("a2 text", image),
     )
-    q2 = quest2pdf.question.MultiChoiceQuest("q2 text", "", image)
-    q2.add_answer(quest2pdf.question.MultiChoiceAnswer("a3 text"))
+    q2 = quest2pdf.MultiChoiceQuest("q2 text", "", image)
+    q2.add_answer(quest2pdf.MultiChoiceAnswer("a3 text"))
     ex = quest2pdf.Exam(q1, q2)
     ex.add_path_parent(file_path)
 
@@ -320,10 +333,25 @@ def test_shuffle():
     )
     ex.load(data)
     random.seed(1)
-    ex.shuffle()
+    ex.answers_shuffle()
 
     for question, value in zip(ex.questions, correct_values):
         assert question.correct_option == value
+
+
+def test_questions_shuffle(fake_exam):
+    """GIVEN exam with five questions
+    WHEN questions_shuffle is called (questions order is mixed)
+    THEN questions order is changed
+    """
+    expected_text = ("q3 text", "q4 text", "q5 text", "q1 text", "q2 text")
+
+    ex = fake_exam
+    random.seed(1)
+    ex.questions_shuffle()
+
+    for i, question in enumerate(ex.questions):
+        assert question.text == expected_text[i]
 
 
 def test_exam_print():
