@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 import csv
 import random
@@ -87,6 +89,9 @@ class Exam:
         self.load(rows)
         self.add_path_parent(file_path)
 
+    def copy(self) -> Exam:
+        return self
+
     def print(
         self,
         exam_file_name: Path,
@@ -143,17 +148,25 @@ class SerializeExam:
     answers, made of text and image.
     """
 
-    def __init__(self, serial_data: Iterable):
+    def __init__(self, serial_data: Iterable, shuffle_item: bool = False, shuffle_sub: bool = False):
         self._serial_data: Iterable = serial_data
+        self._shuffle_item: bool = shuffle_item
+        self._shuffle_sub: bool = shuffle_sub
+        self._serial_data_list: List[Iterable] = []
 
     def assignment(self) -> Generator[Item, None, None]:
-        for question in self._serial_data:
+        serial_data = self._shuffle()
+        for question in serial_data:
             yield Item(ItemLevel.top, question.text, question.image)
             for answer in question.answers:
                 yield Item(ItemLevel.sub, answer.text, answer.image)
 
     def correction(self) -> Generator[Item, None, None]:
-        if self._serial_data != ():
-            yield Item(ItemLevel.top, f"correction", Path("."))
-        for question in self._serial_data:
-            yield Item(ItemLevel.sub, f"{question.correct_option}", Path("."))
+        for serial_data in self._serial_data_list:
+            if serial_data != ():
+                yield Item(ItemLevel.top, f"correction", Path("."))
+            for question in serial_data:
+                yield Item(ItemLevel.sub, f"{question.correct_option}", Path("."))
+
+    def _shuffle(self) -> Iterable:
+        pass
