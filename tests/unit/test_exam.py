@@ -6,6 +6,8 @@ import subprocess
 import random
 from itertools import chain
 import quest2pdf
+from quest2pdf.exam import SerializeExam
+from quest2pdf.utility import Item, ItemLevel
 from unit_helper import save_empty_question, save_question_data, save_tf_question
 
 
@@ -20,14 +22,59 @@ def fd_input(prompt):
 @pytest.fixture
 def fake_exam():
     q1, q2, q3, q4, q5 = (
-        quest2pdf.Question("q1 text"),
-        quest2pdf.Question("q2 text"),
-        quest2pdf.Question("q3 text"),
-        quest2pdf.Question("q4 text"),
-        quest2pdf.Question("q5 text")
+        quest2pdf.Question("q1 text", "q1 subject", pathlib.Path("q1 image"), 1),
+        quest2pdf.Question("q2 text", "q2 subject", pathlib.Path("q2 image"), 2),
+        quest2pdf.Question("q3 text", "q3 subject", pathlib.Path("q3 image"), 3),
+        quest2pdf.Question("q4 text", "q4 subject", pathlib.Path("q4 image"), 4),
+        quest2pdf.Question("q5 text", "q5 subject", pathlib.Path("q5 image"), 5),
     )
 
+    q1.answers = (quest2pdf.Answer("q1 a1"), quest2pdf.Answer("q1 a2"))
+    q1.correct_index = 1
+    q2.answers = (quest2pdf.Answer("q2 a1"), quest2pdf.Answer("q2 a2"))
+
     return quest2pdf.Exam(q1, q2, q3, q4, q5)
+
+
+@pytest.fixture
+def fake_mix_exam():
+    q1 = quest2pdf.Question("question 1: correct is n. 2", "subject 1", Path("a.png"))
+    a1 = quest2pdf.Answer("answer 1", Path("b.png"))
+    a2 = quest2pdf.Answer("answer 2", Path("c.png"))
+    a3 = quest2pdf.Answer("answer 3", Path("a.png"))
+    q1.answers = (a1, a2, a3)
+    q1.correct_option = "B"
+
+    q2 = quest2pdf.Question("question 2: correct is n. 1", "subject 1", Path("a.png"))
+    a1 = quest2pdf.Answer("answer 1")
+    a2 = quest2pdf.Answer("answer 2")
+    a3 = quest2pdf.Answer("answer 3")
+    q2.answers = (a1, a2, a3)
+
+    q3 = quest2pdf.TrueFalseQuest("question 3: correct is True (first)")
+    a1 = quest2pdf.TrueFalseAnswer(True)
+    a2 = quest2pdf.TrueFalseAnswer(False)
+    q3.answers = (a1, a2)
+
+    q4 = quest2pdf.Question("question 4: no answer", "subject 2", Path("b.png"))
+
+    q5 = quest2pdf.TrueFalseQuest("question 5: correct is False (first))")
+    a1 = quest2pdf.TrueFalseAnswer(False)
+    a2 = quest2pdf.TrueFalseAnswer(True)
+    q5.answers = (a1, a2)
+
+    q6 = quest2pdf.Question("question 6: correct is n. 3", "subject 4", Path("c.png"))
+    a1 = quest2pdf.Answer("answer 1")
+    a2 = quest2pdf.Answer("answer 2")
+    a3 = quest2pdf.Answer("answer 3")
+    a4 = quest2pdf.Answer("answer 4")
+    q6.add_answer(a1)
+    q6.add_answer(a2)
+    q6.add_answer(a3, is_correct=True)
+    q6.add_answer(a4)
+    dummy_ex = quest2pdf.Exam(q1, q2, q3, q4, q5, q6)
+
+    return dummy_ex
 
 
 def test_exam():
@@ -105,13 +152,13 @@ def test_exam_add_path_parent1(tmp_path):
     image = Path("images/image.png")
     file_path = tmp_path / "A.txt"
     file_path.touch()
-    q1 = quest2pdf.MultiChoiceQuest("q1 text", "")
+    q1 = quest2pdf.Question("q1 text", "")
     q1.answers = (
-        quest2pdf.MultiChoiceAnswer("a1 text", image),
-        quest2pdf.MultiChoiceAnswer("a2 text", image),
+        quest2pdf.Answer("a1 text", image),
+        quest2pdf.Answer("a2 text", image),
     )
-    q2 = quest2pdf.MultiChoiceQuest("q2 text", "", image)
-    q2.add_answer(quest2pdf.MultiChoiceAnswer("a3 text"))
+    q2 = quest2pdf.Question("q2 text", "", image)
+    q2.add_answer(quest2pdf.Answer("a3 text"))
     ex = quest2pdf.Exam(q1, q2)
     ex.add_path_parent(file_path)
 
@@ -125,13 +172,13 @@ def test_exam_add_path_parent1(tmp_path):
 def test_exam_add_path_parent2(tmp_path):
     image = Path("images/image.png")
     folder_path = tmp_path
-    q1 = quest2pdf.question.MultiChoiceQuest("q1 text", "")
+    q1 = quest2pdf.question.Question("q1 text", "")
     q1.answers = (
-        quest2pdf.question.MultiChoiceAnswer("a1 text", image),
-        quest2pdf.question.MultiChoiceAnswer("a2 text", image),
+        quest2pdf.question.Answer("a1 text", image),
+        quest2pdf.question.Answer("a2 text", image),
     )
-    q2 = quest2pdf.question.MultiChoiceQuest("q2 text", "", image)
-    q2.add_answer(quest2pdf.question.MultiChoiceAnswer("a3 text"))
+    q2 = quest2pdf.question.Question("q2 text", "", image)
+    q2.add_answer(quest2pdf.question.Answer("a3 text"))
     ex = quest2pdf.Exam(q1, q2)
     ex.add_path_parent(folder_path)
 
@@ -267,23 +314,9 @@ def test_exam_load3():
 def test_exam_load4():
     """test setting _attribute_selector
     """
-    data = (
-        dict(
-            [
-                ("text", "T"),
-                ("subject", "S"),
-                ("XXX level", 2),
-                ("void", ""),
-            ]
-        ),
-    )
+    data = (dict([("text", "T"), ("subject", "S"), ("XXX level", 2), ("void", "")]),)
     ex = quest2pdf.Exam()
-    ex.attribute_selector = (
-        "text",
-        "subject",
-        "void",
-        "level"
-    )
+    ex.attribute_selector = ("text", "subject", "void", "level")
 
     with pytest.raises(quest2pdf.Quest2pdfException):
         ex.load(data)
@@ -381,17 +414,17 @@ def test_exam_print():
 
 
 def test_exam_mcquestion():
-    mcquestion1 = quest2pdf.question.MultiChoiceQuest("mc quest1 text", "subject")
+    mcquestion1 = quest2pdf.question.Question("mc quest1 text", "subject")
     mcquestion1.answers = (
-        quest2pdf.question.MultiChoiceAnswer("Q1 A1"),
-        quest2pdf.question.MultiChoiceAnswer("Q1 A2"),
-        quest2pdf.question.MultiChoiceAnswer("Q1 A3"),
+        quest2pdf.question.Answer("Q1 A1"),
+        quest2pdf.question.Answer("Q1 A2"),
+        quest2pdf.question.Answer("Q1 A3"),
     )
-    mcquestion2 = quest2pdf.question.MultiChoiceQuest("mc quest2 text", "subject")
+    mcquestion2 = quest2pdf.question.Question("mc quest2 text", "subject")
     mcquestion2.answers = (
-        quest2pdf.question.MultiChoiceAnswer("Q2 A1"),
-        quest2pdf.question.MultiChoiceAnswer("Q2 A2"),
-        quest2pdf.question.MultiChoiceAnswer("Q2 A3"),
+        quest2pdf.question.Answer("Q2 A1"),
+        quest2pdf.question.Answer("Q2 A2"),
+        quest2pdf.question.Answer("Q2 A3"),
     )
 
     ex = quest2pdf.Exam(mcquestion1, mcquestion2)
@@ -402,12 +435,12 @@ def test_exam_mcquestion():
 
 
 def test_exam_tfquestion():
-    tfquestion1 = quest2pdf.question.MultiChoiceQuest("mc quest1 text", "subject")
+    tfquestion1 = quest2pdf.question.Question("mc quest1 text", "subject")
     tfquestion1.answers = (
         quest2pdf.question.TrueFalseAnswer(True),
         quest2pdf.question.TrueFalseAnswer(False),
     )
-    tfquestion2 = quest2pdf.question.MultiChoiceQuest("mc quest2 text", "subject")
+    tfquestion2 = quest2pdf.question.Question("mc quest2 text", "subject")
     tfquestion2.answers = (
         quest2pdf.question.TrueFalseAnswer(False),
         quest2pdf.question.TrueFalseAnswer(True),
@@ -422,13 +455,13 @@ def test_exam_tfquestion():
 
 
 def test_exam_mixquestion():
-    mcquestion = quest2pdf.question.MultiChoiceQuest("mc quest1 text", "subject")
+    mcquestion = quest2pdf.question.Question("mc quest1 text", "subject")
     mcquestion.answers = (
-        quest2pdf.question.MultiChoiceAnswer("Q1 A1"),
-        quest2pdf.question.MultiChoiceAnswer("Q1 A2"),
-        quest2pdf.question.MultiChoiceAnswer("Q1 A3"),
+        quest2pdf.question.Answer("Q1 A1"),
+        quest2pdf.question.Answer("Q1 A2"),
+        quest2pdf.question.Answer("Q1 A3"),
     )
-    tfquestion = quest2pdf.question.MultiChoiceQuest("mc quest2 text", "subject")
+    tfquestion = quest2pdf.question.Question("mc quest2 text", "subject")
     tfquestion.answers = (
         quest2pdf.question.TrueFalseAnswer(False),
         quest2pdf.question.TrueFalseAnswer(True),
@@ -475,6 +508,89 @@ def test_from_csv2(tmp_path):
     assert ex.questions[0].correct_option == False
 
 
+def test_copy_exam(fake_exam):
+    """GIVEN an exam
+    WHEN a copy is made
+    THEN the new one is identical"""
+    ex = fake_exam
+    new_ex = ex.copy()
+
+    import logging
+
+    logging.warning("ex and new ex \n%s\n%s", ex, new_ex)
+
+    for ex_question, new_ex_question in zip(ex.questions, new_ex.questions):
+        assert ex_question.text == new_ex_question.text
+        assert ex_question.level == new_ex_question.level
+        assert ex_question.correct_index == new_ex_question.correct_index
+        assert ex_question.correct_option == new_ex_question.correct_option
+        for ex_answer, new_ex_answer in zip(
+            ex_question.answers, new_ex_question.answers
+        ):
+            assert ex_answer.text == new_ex_answer.text
+            assert ex_answer.image == new_ex_answer.image
+
+
+def test_copy_exam_add_question(fake_exam):
+    """GIVEN a exam  copy
+    WHEN a question is added to the copy
+    THEN the original number of questions does not change"""
+    ex = fake_exam
+    ex_questions_len = len(ex.questions)
+    new_ex = ex.copy()
+    new_ex.add_question(quest2pdf.Question("new"))
+
+    assert len(ex.questions) == ex_questions_len
+
+
+def test_copy_mix_exam_add_question(fake_mix_exam):
+    ex = fake_mix_exam
+    ex_questions_len = len(ex.questions)
+    new_ex = ex.copy()
+    new_ex.add_question(quest2pdf.Question("new"))
+    import logging
+
+    assert len(ex.questions) == ex_questions_len
+
+
+def test_copy_exam_add_answer(fake_exam):
+    ex = fake_exam
+    question_1_answers_len = len(ex.questions[0].answers)
+    new_ex = ex.copy()
+    new_ex.questions[0].add_answer(quest2pdf.Answer("q1 a3"))
+
+    assert len(ex.questions[0].answers) == question_1_answers_len
+
+
+def test_copy_exam_set_correct_answer(fake_exam):
+    ex = fake_exam
+    question_1_correct_index = ex.questions[1].correct_index
+    new_ex = ex.copy()
+    new_ex.questions[1].correct_index = question_1_correct_index + 1
+
+    assert ex.questions[1].correct_index == question_1_correct_index
+
+
+def test_copy_exam_shuffle_answers(fake_exam):
+    ex = fake_exam
+    ex_correct_answers = tuple(question.correct_index for question in ex.questions)
+    new_ex = ex.copy()
+    new_ex.answers_shuffle()
+
+    assert (
+        tuple(question.correct_index for question in ex.questions) == ex_correct_answers
+    )
+
+
+def test_copy_exam_shuffle_questions(fake_exam):
+    ex = fake_exam
+    ex_questions = tuple(question.text for question in ex.questions)
+    new_ex = ex.copy()
+    new_ex.questions_shuffle()
+
+    assert tuple(question.text for question in ex.questions) == ex_questions
+
+
 def test_print_exam0(tmp_path):
     pdf_magic_no = b"PDF"
     file_path = tmp_path / "Exam"
@@ -492,10 +608,10 @@ def test_print_exam0(tmp_path):
 def test_print_exam1(tmp_path):
     pdf_magic_no = b"PDF"
     file_path = tmp_path / "Exam"
-    q1 = quest2pdf.question.MultiChoiceQuest("q1 text", "")
+    q1 = quest2pdf.question.Question("q1 text", "")
     q1.answers = (
-        quest2pdf.question.MultiChoiceAnswer("a1 text"),
-        quest2pdf.question.MultiChoiceAnswer("a2 text"),
+        quest2pdf.question.Answer("a1 text"),
+        quest2pdf.question.Answer("a2 text"),
     )
     ex = quest2pdf.Exam(q1)
     ex.print(file_path)
@@ -512,20 +628,20 @@ def test_print_exam2(tmp_path):
     """Test if shuttle argument in print, works
     """
     file_path = tmp_path / "Exam"
-    q1 = quest2pdf.question.MultiChoiceQuest("q1 text", "")
+    q1 = quest2pdf.question.Question("q1 text", "")
     q1.answers = (
-        quest2pdf.question.MultiChoiceAnswer("a1 text"),
-        quest2pdf.question.MultiChoiceAnswer("a2 text"),
+        quest2pdf.question.Answer("a1 text"),
+        quest2pdf.question.Answer("a2 text"),
     )
-    q2 = quest2pdf.question.MultiChoiceQuest("q2 text", "")
+    q2 = quest2pdf.question.Question("q2 text", "")
     q2.answers = (
-        quest2pdf.question.MultiChoiceAnswer("a1 text"),
-        quest2pdf.question.MultiChoiceAnswer("a2 text"),
-        quest2pdf.question.MultiChoiceAnswer("a3 text"),
-        quest2pdf.question.MultiChoiceAnswer("a4 text")
+        quest2pdf.question.Answer("a1 text"),
+        quest2pdf.question.Answer("a2 text"),
+        quest2pdf.question.Answer("a3 text"),
+        quest2pdf.question.Answer("a4 text"),
     )
     ex = quest2pdf.Exam(q1, q2)
-    ex.print(file_path, shuffle=False)
+    ex.print(file_path, answers_shuffle=False)
 
     assert ex.questions[0].correct_index == 0
     assert ex.questions[1].correct_index == 0
@@ -550,11 +666,8 @@ def test_print_correction1(tmp_path):
     pdf_magic_no = b"PDF"
     exam_file_path = tmp_path / "Exam"
     correction_file_path = tmp_path / "Correction"
-    q1 = quest2pdf.question.MultiChoiceQuest("q1 text", "")
-    q1.answers = (
-        quest2pdf.question.MultiChoiceAnswer("a1 text"),
-        quest2pdf.question.MultiChoiceAnswer("a2 text"),
-    )
+    q1 = quest2pdf.Question("q1 text", "")
+    q1.answers = (quest2pdf.Answer("a1 text"), quest2pdf.Answer("a2 text"))
     ex = quest2pdf.Exam(q1)
     ex.print(exam_file_path, correction_file_name=correction_file_path)
 
@@ -568,61 +681,17 @@ def test_print_correction1(tmp_path):
 
 @pytest.fixture
 def dummy_exam():
-    q1 = quest2pdf.question.MultiChoiceQuest(
-        "question 1: correct is n. 2", "subject 1", pathlib.Path("a.png")
-    )
-    a1 = quest2pdf.question.MultiChoiceAnswer("answer 1", pathlib.Path("b.png"))
-    a2 = quest2pdf.question.MultiChoiceAnswer("answer 2", pathlib.Path("c.png"))
-    a3 = quest2pdf.question.MultiChoiceAnswer("answer 3", pathlib.Path("t1.jpg"))
+    q1 = quest2pdf.Question("question 1: correct is n. 2", "subject 1", Path("a.png"))
+    a1 = quest2pdf.Answer("answer 1", Path("b.png"))
+    a2 = quest2pdf.Answer("answer 2", Path("c.png"))
+    a3 = quest2pdf.Answer("answer 3", Path("a.png"))
     q1.answers = (a1, a2, a3)
     q1.correct_option = "B"
 
-    q2 = quest2pdf.question.MultiChoiceQuest(
-        "question 2: no answer", "subject 2", pathlib.Path("t1.jpg")
-    )
-
-    q3 = quest2pdf.question.TrueFalseQuest(
-        "question 3: correct is False (first added)",
-        "subject 3",
-        pathlib.Path("test.png"),
-    )
-    a1 = quest2pdf.TrueFalseAnswer(False)
-    a2 = quest2pdf.TrueFalseAnswer(True)
-    q3.answers = (a1, a2)
-
-    q4 = quest2pdf.question.MultiChoiceQuest(
-        "question 4: correct is n. 3", "subject 4", pathlib.Path("t2.png")
-    )
-    a1 = quest2pdf.question.MultiChoiceAnswer("answer 1")
-    a2 = quest2pdf.question.MultiChoiceAnswer("answer 2")
-    a3 = quest2pdf.question.MultiChoiceAnswer("answer 3")
-    a4 = quest2pdf.question.MultiChoiceAnswer("answer 4")
-    q4.add_answer(a1)
-    q4.add_answer(a2)
-    q4.add_answer(a3, is_correct=True)
-    q4.add_answer(a4)
-    dummy_ex = quest2pdf.Exam(q1, q2, q3, q4)
-
-    return dummy_ex
-
-
-@pytest.fixture
-def dummy_exam():
-    q1 = quest2pdf.MultiChoiceQuest(
-        "question 1: correct is n. 2", "subject 1", Path("a.png")
-    )
-    a1 = quest2pdf.MultiChoiceAnswer("answer 1", Path("b.png"))
-    a2 = quest2pdf.MultiChoiceAnswer("answer 2", Path("c.png"))
-    a3 = quest2pdf.MultiChoiceAnswer("answer 3", Path("a.png"))
-    q1.answers = (a1, a2, a3)
-    q1.correct_option = "B"
-
-    q2 = quest2pdf.MultiChoiceQuest(
-        "question 2: correct is n. 1", "subject 1", Path("a.png")
-    )
-    a1 = quest2pdf.MultiChoiceAnswer("answer 1")
-    a2 = quest2pdf.MultiChoiceAnswer("answer 2")
-    a3 = quest2pdf.MultiChoiceAnswer("answer 3")
+    q2 = quest2pdf.Question("question 2: correct is n. 1", "subject 1", Path("a.png"))
+    a1 = quest2pdf.Answer("answer 1")
+    a2 = quest2pdf.Answer("answer 2")
+    a3 = quest2pdf.Answer("answer 3")
     q2.answers = (a1, a2, a3)
 
     q3 = quest2pdf.TrueFalseQuest("question 3: correct is True (first)")
@@ -630,20 +699,18 @@ def dummy_exam():
     a2 = quest2pdf.TrueFalseAnswer(False)
     q3.answers = (a1, a2)
 
-    q4 = quest2pdf.MultiChoiceQuest("question 4: no answer", "subject 2", Path("b.png"))
+    q4 = quest2pdf.Question("question 4: no answer", "subject 2", Path("b.png"))
 
     q5 = quest2pdf.TrueFalseQuest("question 5: correct is False (first))")
     a1 = quest2pdf.TrueFalseAnswer(False)
     a2 = quest2pdf.TrueFalseAnswer(True)
     q5.answers = (a1, a2)
 
-    q6 = quest2pdf.MultiChoiceQuest(
-        "question 6: correct is n. 3", "subject 4", Path("c.png")
-    )
-    a1 = quest2pdf.MultiChoiceAnswer("answer 1")
-    a2 = quest2pdf.MultiChoiceAnswer("answer 2")
-    a3 = quest2pdf.MultiChoiceAnswer("answer 3")
-    a4 = quest2pdf.MultiChoiceAnswer("answer 4")
+    q6 = quest2pdf.Question("question 6: correct is n. 3", "subject 4", Path("c.png"))
+    a1 = quest2pdf.Answer("answer 1")
+    a2 = quest2pdf.Answer("answer 2")
+    a3 = quest2pdf.Answer("answer 3")
+    a4 = quest2pdf.Answer("answer 4")
     q6.add_answer(a1)
     q6.add_answer(a2)
     q6.add_answer(a3, is_correct=True)
@@ -676,3 +743,50 @@ def test_print_have_a_look(tmp_path, dummy_exam):
 
     answer = fd_input("Is it correct (y)? ")
     assert answer == "y\n"
+
+
+def test_serialize_empty():
+    ex = quest2pdf.Exam()
+    serial = SerializeExam(ex)
+
+    assert list(serial.assignment()) == []
+    assert list(serial.correction()) == []
+
+
+def test_serialize_assignment(fake_exam):
+    ex = fake_exam
+    serial = SerializeExam(ex)
+    generator = serial.assignment()
+
+    assert next(generator) == Item(ItemLevel.top, "q1 text", pathlib.Path("q1 image"))
+    _ = next(generator)
+    assert next(generator) == Item(ItemLevel.sub, "q1 a2", pathlib.Path())
+    _ = (
+        next(generator),
+        next(generator),
+        next(generator),
+        next(generator),
+        next(generator),
+    )
+    assert next(generator) == Item(ItemLevel.top, "q5 text", pathlib.Path("q5 image"))
+    with pytest.raises(StopIteration):
+        next(generator)
+
+
+def test_serialize_assignment_shuffle_sub(fake_exam):
+    ex = fake_exam
+    serial = SerializeExam(ex, shuffle_sub=True)
+    random.seed(0)
+    generator = serial.assignment()
+
+    assert next(generator) == Item(ItemLevel.top, "q1 text", pathlib.Path("q1 image"))
+    assert next(generator) == Item(ItemLevel.sub, "q1 a1", pathlib.Path())
+    assert next(generator) == Item(ItemLevel.sub, "q1 a2", pathlib.Path())
+    assert next(generator) == Item(ItemLevel.top, "q2 text", pathlib.Path("q2 image"))
+    assert next(generator) == Item(ItemLevel.sub, "q2 a1", pathlib.Path())
+    assert next(generator) == Item(ItemLevel.sub, "q2 a2", pathlib.Path())
+
+
+def test_serialize_correction(fake_exam):
+    ex = fake_exam
+    serial = SerializeExam(ex.questions)

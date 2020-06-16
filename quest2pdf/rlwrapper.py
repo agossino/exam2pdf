@@ -9,7 +9,7 @@ from reportlab.platypus import (
     ListFlowable,
     ListItem,
     Spacer,
-    KeepTogether
+    KeepTogether,
 )
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
