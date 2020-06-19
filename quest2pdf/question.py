@@ -129,7 +129,7 @@ class Question:
         self._marker = "*"
         self._correct_option: Optional[str] = None  # setter bypassed
         self._answer_type = Answer
-        self._answers: List[self._answer_type] = []
+        self._answers: List[Answer] = []
 
     @property
     def text(self) -> str:
