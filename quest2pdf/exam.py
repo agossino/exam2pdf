@@ -5,7 +5,7 @@ import csv
 import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
 import logging
-from .question import Question, Question, TrueFalseQuest
+from .question import Question, TrueFalseQuest
 from .utility import ItemLevel, Item, Quest2pdfException
 from .export import RLInterface
 
@@ -98,6 +98,7 @@ class Exam:
         answers_shuffle: bool = False,
         questions_shuffle: bool = False,
         destination: Path = Path(),
+        n_copies: int = 1,
         heading: str = "",
         footer: str = "",
     ) -> None:
@@ -107,14 +108,17 @@ class Exam:
             self, shuffle_item=questions_shuffle, shuffle_sub=answers_shuffle
         )
 
-        interface = RLInterface(
-            questions_serialized.assignment(),
-            exam_file_name,
-            destination=destination,
-            heading=heading,
-            footer=footer,
-        )
-        interface.build()
+        heading = exam_file_name.name if heading == "" else heading
+
+        for number in range(1, n_copies + 1):
+            interface = RLInterface(
+                questions_serialized.assignment(),
+                exam_file_name,
+                destination=destination,
+                heading=f"{heading} {number}/{n_copies}",
+                footer=footer,
+            )
+            interface.build()
 
         if correction_file_name is not None:
             interface = RLInterface(
@@ -154,6 +158,7 @@ class SerializeExam:
         self._shuffle_item: bool = shuffle_item
         self._shuffle_sub: bool = shuffle_sub
         self._exams_sequence: List[Exam] = []
+        self._correction_top_text: str = f"correction:"
 
     def assignment(self) -> Generator[Item, None, None]:
         exam = self._get_a_shuffled_copy()
@@ -163,9 +168,11 @@ class SerializeExam:
                 yield Item(ItemLevel.sub, answer.text, answer.image)
 
     def correction(self) -> Generator[Item, None, None]:
-        for number, exam in enumerate(self._exams_sequence, 1):
+        total_copies = len(self._exams_sequence)
+        for copy_number, exam in enumerate(self._exams_sequence, 1):
             if exam.questions != ():
-                yield Item(ItemLevel.top, f"correction for exam n. {number}", Path("."))
+                top_text = f"{self._correction_top_text} {copy_number}/{total_copies}"
+                yield Item(ItemLevel.top, top_text, Path("."))
             for question in exam.questions:
                 yield Item(ItemLevel.sub, f"{question.correct_option}", Path("."))
 
