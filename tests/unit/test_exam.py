@@ -632,21 +632,76 @@ def test_serialize_assignment(dummy_exam):
         next(generator)
 
 
-def test_serialize_assignment_shuffle_sub(dummy_exam):
-    ex = dummy_exam
+def test_serialize_assignment_shuffle_sub(big_dummy_exam):
+    ex = big_dummy_exam
     serial = SerializeExam(ex, shuffle_sub=True)
     random.seed(0)
-    generator = serial.assignment()
+    expected_sub_sequence = [
+        "1",
+        "3",
+        "2",
+        "3",
+        "2",
+        "1",
+        "True",
+        "False",
+        "True",
+        "False",
+        "1",
+        "3",
+        "2",
+        "4",
+    ]
+    expected_sub_sequence.reverse()
 
-    assert next(generator) == Item(ItemLevel.top, "q1 text", Path("q1 image"))
-    assert next(generator) == Item(ItemLevel.sub, "q1 a1", Path())
-    assert next(generator) == Item(ItemLevel.sub, "q1 a2", Path())
-    assert next(generator) == Item(ItemLevel.top, "q2 text", Path("q2 image"))
-    assert next(generator) == Item(ItemLevel.sub, "q2 a1", Path())
-    assert next(generator) == Item(ItemLevel.sub, "q2 a2", Path())
+    for item in serial.assignment():
+        if item.item_level == ItemLevel.sub:
+            assert expected_sub_sequence.pop() in item.text
 
 
-def test_serialize_correction(dummy_exam):
+def test_serialize_assignment_shuffle_top(dummy_exam):
+    ex = dummy_exam
+    serial = SerializeExam(ex, shuffle_item=True)
+    random.seed(0)
+    expected_top_sequence = ["3", "2", "1", "5", "4"]
+    expected_top_sequence.reverse()
+
+    for item in serial.assignment():
+        if item.item_level == ItemLevel.top:
+            assert expected_top_sequence.pop() in item.text
+
+
+def test_serialize_assignment_shuffle_top_n_copies(dummy_exam):
+    ex = dummy_exam
+    n_copies = 3
+    serial = SerializeExam(ex, shuffle_item=True)
+    random.seed(0)
+    expected_top_sequence = [
+        "3",
+        "2",
+        "1",
+        "5",
+        "4",
+        "1",
+        "3",
+        "2",
+        "4",
+        "5",
+        "2",
+        "1",
+        "5",
+        "3",
+        "4",
+    ]
+    expected_top_sequence.reverse()
+
+    for _ in range(n_copies):
+        for item in serial.assignment():
+            if item.item_level == ItemLevel.top:
+                assert expected_top_sequence.pop() in item.text
+
+
+def test_serialize_correction_one_copy(dummy_exam):
     ex = dummy_exam
     serial = SerializeExam(ex)
     for _ in serial.assignment():
@@ -657,3 +712,17 @@ def test_serialize_correction(dummy_exam):
     assert item.item_level == ItemLevel.top
     assert "correction" in item.text
     assert "1/1" in item.text
+
+
+def test_serialize_correction_n_copies(dummy_exam):
+    ex = dummy_exam
+    n_copies = 4
+    expected_num_sequence = list(range(n_copies, 0, -1))
+    serial = SerializeExam(ex)
+    for _ in range(n_copies):
+        for _ in serial.assignment():
+            pass
+
+    for item in serial.correction():
+        if item.item_level == ItemLevel.top:
+            assert f"{expected_num_sequence.pop()}/{n_copies}" in item.text

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from random import shuffle
-from typing import Tuple, Iterator, Any, Optional, List, Iterable, Callable
+from typing import Tuple, Iterator, Any, Optional, List, Iterable, Callable, Union
 from .utility import safe_int, Quest2pdfException
 
 
@@ -184,11 +184,13 @@ class Question:
             raise TypeError(f"{value} is not an int")
 
     @property
-    def answers(self) -> Tuple[Answer, ...]:
+    def answers(self) -> Union[Tuple[Answer], Tuple[TrueFalseAnswer]]:
         return tuple(self._answers)
 
     @answers.setter
-    def answers(self, values: Iterable[Answer]) -> None:
+    def answers(
+        self, values: Union[Iterable[Answer], Iterable[TrueFalseAnswer]]
+    ) -> None:
         """Set answers given a sequence of them, overriding any
         previous data.
         """

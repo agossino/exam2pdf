@@ -244,6 +244,11 @@ def test_question_get(attribute, expected):
     assert getattr(q, attribute) == expected
 
 
+def test_question_get_type_caster():
+    q = quest2pdf.Question()
+    assert len(q.type_caster_sequence) == 4
+
+
 @pytest.mark.parametrize(
     "attribute, expected",
     [
