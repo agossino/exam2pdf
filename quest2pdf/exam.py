@@ -4,14 +4,9 @@ from pathlib import Path
 import csv
 import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
-import logging
 from .question import Question, TrueFalseQuest
 from .utility import ItemLevel, Item, Quest2pdfException
 from .export import RLInterface
-
-
-LOGNAME = "quest2pdf." + __name__
-LOGGER = logging.getLogger(LOGNAME)
 
 
 class Exam:
@@ -111,9 +106,17 @@ class Exam:
         heading = exam_file_name.name if heading == "" else heading
 
         for number in range(1, n_copies + 1):
+            if n_copies > 1:
+                file_name = (
+                    exam_file_name.parent
+                    / f"{exam_file_name.name}_{number}_{n_copies}.{exam_file_name.suffix}"
+                )
+            else:
+                file_name = exam_file_name
+
             interface = RLInterface(
                 questions_serialized.assignment(),
-                exam_file_name,
+                file_name,
                 destination=destination,
                 heading=f"{heading} {number}/{n_copies}",
                 footer=footer,

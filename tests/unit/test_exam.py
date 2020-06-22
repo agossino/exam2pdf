@@ -4,7 +4,7 @@ import random
 
 import quest2pdf
 from quest2pdf.exam import SerializeExam
-from quest2pdf.utility import Item, ItemLevel
+from quest2pdf.utility import ItemLevel
 
 
 def test_exam():
@@ -507,7 +507,7 @@ def test_copy_exam_shuffle_questions(dummy_exam):
     assert tuple(question.text for question in ex.questions) == ex_questions
 
 
-def test_print_exam0(tmp_path):
+def test_print_exam(tmp_path):
     pdf_magic_no = b"PDF"
     file_path = tmp_path / "Exam"
     ex = quest2pdf.Exam()
@@ -521,15 +521,10 @@ def test_print_exam0(tmp_path):
     assert data.find(pdf_magic_no) == 1
 
 
-def test_print_exam1(tmp_path):
+def test_print_one_exam(tmp_path, dummy_exam_with_img):
     pdf_magic_no = b"PDF"
-    file_path = tmp_path / "Exam"
-    q1 = quest2pdf.question.Question("q1 text", "")
-    q1.answers = (
-        quest2pdf.question.Answer("a1 text"),
-        quest2pdf.question.Answer("a2 text"),
-    )
-    ex = quest2pdf.Exam(q1)
+    file_path = tmp_path / "Exam.pdf"
+    ex = dummy_exam_with_img
     ex.print(file_path)
 
     try:
@@ -540,27 +535,29 @@ def test_print_exam1(tmp_path):
     assert data.find(pdf_magic_no) == 1
 
 
-def test_print_exam2(tmp_path):
-    """Test if shuttle argument in print, works
-    """
-    file_path = tmp_path / "Exam"
-    q1 = quest2pdf.question.Question("q1 text", "")
-    q1.answers = (
-        quest2pdf.question.Answer("a1 text"),
-        quest2pdf.question.Answer("a2 text"),
-    )
-    q2 = quest2pdf.question.Question("q2 text", "")
-    q2.answers = (
-        quest2pdf.question.Answer("a1 text"),
-        quest2pdf.question.Answer("a2 text"),
-        quest2pdf.question.Answer("a3 text"),
-        quest2pdf.question.Answer("a4 text"),
-    )
-    ex = quest2pdf.Exam(q1, q2)
-    ex.print(file_path, answers_shuffle=False)
+def test_print_one_exam_with_wrong_img(tmp_path, dummy_exam):
+    file_path = tmp_path / "Exam.pdf"
+    ex = dummy_exam
+    with pytest.raises(OSError):
+        ex.print(file_path)
 
-    assert ex.questions[0].correct_index == 0
-    assert ex.questions[1].correct_index == 0
+
+def test_print_two_exams(tmp_path, dummy_exam_with_img):
+    pdf_magic_no = b"PDF"
+    file_path = tmp_path / "Exam.pdf"
+    ex = dummy_exam_with_img
+    n_copies = 2
+    ex.print(file_path, n_copies=n_copies)
+
+    for num in range(1, n_copies + 1):
+        out_file = tmp_path / f"{file_path.name}_{num}_{n_copies}.{file_path.suffix}"
+
+        try:
+            data = out_file.read_bytes()
+        except FileNotFoundError:
+            assert False, "File not found"
+
+        assert data.find(pdf_magic_no) == 1
 
 
 def test_print_correction0(tmp_path):
@@ -615,21 +612,21 @@ def test_serialize_empty():
 def test_serialize_assignment(dummy_exam):
     ex = dummy_exam
     serial = SerializeExam(ex)
-    generator = serial.assignment()
+    expected_sequence = [
+        "q1 text",
+        "q1 a1",
+        "q1 a2",
+        "q2 text",
+        "q2 a1",
+        "q2 a2",
+        "q3 text",
+        "q4 text",
+        "q5 text",
+    ]
+    expected_sequence.reverse()
 
-    assert next(generator) == Item(ItemLevel.top, "q1 text", Path("q1 image"))
-    _ = next(generator)
-    assert next(generator) == Item(ItemLevel.sub, "q1 a2", Path())
-    _ = (
-        next(generator),
-        next(generator),
-        next(generator),
-        next(generator),
-        next(generator),
-    )
-    assert next(generator) == Item(ItemLevel.top, "q5 text", Path("q5 image"))
-    with pytest.raises(StopIteration):
-        next(generator)
+    for item in serial.assignment():
+        assert item.text == expected_sequence.pop()
 
 
 def test_serialize_assignment_shuffle_sub(big_dummy_exam):
