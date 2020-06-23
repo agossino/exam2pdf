@@ -1,11 +1,7 @@
 import re
-import logging
 from typing import List
 from collections import namedtuple
 from enum import Enum
-
-LOGNAME = "quest2pdf"
-LOGGER = logging.getLogger(LOGNAME)
 
 
 class Quest2pdfException(BaseException):
@@ -38,10 +34,7 @@ def exception_printer(exception_instance: Exception) -> str:
     """
     pattern: str = r"\W+"
     exc_list: List[str] = re.split(pattern, str(exception_instance.__class__))
-    try:
-        return exc_list[2] + ": " + str(exception_instance)
-    except IndexError:
-        return str(exception_instance)
+    return exc_list[2] + ": " + str(exception_instance)
 
 
 def safe_int(text: str) -> int:

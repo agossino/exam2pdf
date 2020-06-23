@@ -512,29 +512,6 @@ def test_question_load_full():
     assert quest.answers == ()
 
 
-def test_question_load_partial_answer(monkeypatch):
-    """load a complete question and one more item
-    for partly fill an answer
-    """
-
-    class MonkeyAnswer(quest2pdf.Answer):
-        def __init__(self):
-            super().__init__()
-            self._attr_load_sequence = ("text", "image")
-            self._type_caster_sequence = (str, str)
-
-    test_tuple = ("t1", "s1", "p1", "1", "a1")
-    quest = quest2pdf.Question()
-    monkeypatch.setattr(quest, "_answer_type", MonkeyAnswer)
-    quest.load_sequentially(iter(test_tuple))
-
-    assert quest.text == test_tuple[0]
-    assert quest.subject == test_tuple[1]
-    assert quest.image == Path(test_tuple[2])
-    assert quest.level == int(test_tuple[3])
-    assert quest.answers[0].text == test_tuple[4]
-
-
 def test_question_load_full_answer(monkeypatch):
     """load a complete question and answer
     """
@@ -850,6 +827,27 @@ def test_truefalse_question_add_three_answers():
 
     with pytest.raises(ValueError):
         quest.answers = (true_answer_1, false_answer, true_answer_2)
+
+
+def test_truefalse_question_correct_answer_set():
+    true_answer = quest2pdf.TrueFalseAnswer(True)
+    false_answer = quest2pdf.TrueFalseAnswer(False)
+    quest = quest2pdf.TrueFalseQuest("question")
+    quest._answers = (true_answer, false_answer)
+
+    quest.correct_answer = false_answer
+
+    assert quest.correct_answer == false_answer
+
+
+def test_truefalse_question_wrong_correct_answer_set():
+    true_answer = quest2pdf.TrueFalseAnswer(True)
+    false_answer = quest2pdf.TrueFalseAnswer(False)
+    quest = quest2pdf.TrueFalseQuest("question")
+    quest._answers = (true_answer,)
+
+    with pytest.raises(ValueError):
+        quest.correct_answer = false_answer
 
 
 def test_truefalse_question_shuffle_empty():

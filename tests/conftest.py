@@ -12,11 +12,11 @@ import quest2pdf
 @pytest.fixture
 def dummy_exam():
     q1, q2, q3, q4, q5 = (
-        quest2pdf.Question("q1 text", "q1 subject", Path("q1 image"), 1),
-        quest2pdf.Question("q2 text", "q2 subject", Path("q2 image"), 2),
-        quest2pdf.Question("q3 text", "q3 subject", Path("q3 image"), 3),
-        quest2pdf.Question("q4 text", "q4 subject", Path("q4 image"), 4),
-        quest2pdf.Question("q5 text", "q5 subject", Path("q5 image"), 5),
+        quest2pdf.Question("q1 text", "q1 subject", Path("a.png"), 1),
+        quest2pdf.Question("q2 text", "q2 subject", Path("b.png"), 2),
+        quest2pdf.Question("q3 text", "q3 subject", Path("c.png"), 3),
+        quest2pdf.Question("q4 text", "q4 subject", Path("a.png"), 4),
+        quest2pdf.Question("q5 text", "q5 subject", Path("b.png"), 5),
     )
 
     q1.answers = (quest2pdf.Answer("q1 a1"), quest2pdf.Answer("q1 a2"))
@@ -24,6 +24,22 @@ def dummy_exam():
     q2.answers = (quest2pdf.Answer("q2 a1"), quest2pdf.Answer("q2 a2"))
 
     return quest2pdf.Exam(q1, q2, q3, q4, q5)
+
+
+@pytest.fixture
+def dummy_exam_with_img(tmp_path, dummy_exam):
+    image_folder = Path("tests/unit/resources")
+    image_tmp_folder = tmp_path / image_folder.name
+    image_tmp_folder.mkdir()
+
+    for file in chain(image_folder.glob("*.png"), image_folder.glob("*.jpg")):
+        data = file.read_bytes()
+        copied_file = tmp_path / image_folder.name / file.name
+        copied_file.write_bytes(data)
+
+    dummy_exam.add_path_parent(image_tmp_folder)
+
+    return dummy_exam
 
 
 @pytest.fixture
@@ -195,8 +211,7 @@ def have_a_look(tmp_path, big_dummy_exam):
     exam_file_path = tmp_path / "Exam"
     correction_file_path = tmp_path / "Correction"
     ex = big_dummy_exam
-    folder = image_tmp_folder
-    ex.add_path_parent(folder)
+    ex.add_path_parent(image_tmp_folder)
     ex.print(exam_file_path, correction_file_name=correction_file_path, heading="Not shuffled exam")
 
     subprocess.Popen(["evince", str(exam_file_path)])
