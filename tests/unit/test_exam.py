@@ -4,7 +4,9 @@ import random
 
 import quest2pdf
 from quest2pdf.exam import SerializeExam
-from quest2pdf.utility import ItemLevel
+from quest2pdf.utility import ItemLevel, set_i18n
+
+_ = set_i18n()
 
 
 def test_exam():
@@ -43,7 +45,7 @@ def test_exam_questions_add(question1, question2):
 def test_exam_questions_add_and_set(question1, question2):
     """GIVEN an Exam
     WHEN a question is added
-    AND a tuple with one qwestion is set
+    AND a tuple with one question is set
     THEN attribute assignment override the added questions
     """
     ex = quest2pdf.Exam()
@@ -376,7 +378,7 @@ def test_exam_truefalse_question():
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_answer.boolean is True
     assert ex.questions[1].text == "mc quest2 text"
-    assert ex.questions[1].correct_answer.text == "False"
+    assert ex.questions[1].correct_answer.text == _("False")
 
 
 def test_exam_mix_question():
@@ -397,7 +399,7 @@ def test_exam_mix_question():
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_option == "A"
     assert ex.questions[1].text == "mc quest2 text"
-    assert ex.questions[1].correct_answer.text == "False"
+    assert ex.questions[1].correct_answer.text == _("False")
 
 
 def test_from_csv0(empty_question_file):
@@ -421,7 +423,7 @@ def test_from_csv2(truefalse_question_file):
     ex.attribute_selector = ("question", "void", "void", "void", "A", "void", "B")
     ex.from_csv(truefalse_question_file)
 
-    assert ex.questions[0].correct_option == False
+    assert ex.questions[0].correct_option == _("False")
 
 
 def test_copy_exam(dummy_exam):
@@ -639,10 +641,10 @@ def test_serialize_assignment_shuffle_sub(big_dummy_exam):
         "3",
         "2",
         "1",
-        "True",
-        "False",
-        "True",
-        "False",
+        _("True"),
+        _("False"),
+        _("True"),
+        _("False"),
         "1",
         "3",
         "2",
@@ -700,13 +702,13 @@ def test_serialize_assignment_shuffle_top_n_copies(dummy_exam):
 def test_serialize_correction_one_copy(dummy_exam):
     ex = dummy_exam
     serial = SerializeExam(ex)
-    for _ in serial.assignment():
+    for _1 in serial.assignment():
         pass
     correction = serial.correction()
 
     item = next(correction)
     assert item.item_level == ItemLevel.top
-    assert "correction" in item.text
+    assert _("checker") in item.text
     assert "1/1" in item.text
 
 

@@ -3,10 +3,32 @@ from pathlib import Path
 from itertools import chain
 import random
 import subprocess
+import gettext
 
 import pytest
 
 import quest2pdf
+
+
+@pytest.fixture
+def set_i18n(tmp_path):
+    domain = "quest2pdf"
+    mo_file = "quest2pdf.mo"
+    locale_dir = "locales"
+    it_dir = "it/LC_MESSAGES"
+    app_locales_dir = Path("quest2pdf") / locale_dir
+    mo_source_path = app_locales_dir / it_dir / mo_file
+    file_data = mo_source_path.read_bytes()
+
+    tmp_locales = tmp_path / locale_dir
+    destination_dir = tmp_locales / it_dir
+    destination_dir.mkdir(parents=True)
+    mo_destination_file = destination_dir / mo_file
+    mo_destination_file.write_bytes(file_data)
+
+    gettext.bindtextdomain(domain, localedir=tmp_locales)
+
+    yield
 
 
 @pytest.fixture

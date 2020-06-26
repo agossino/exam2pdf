@@ -4,9 +4,13 @@ from pathlib import Path
 import csv
 import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
+
 from .question import Question, TrueFalseQuest
-from .utility import ItemLevel, Item, Quest2pdfException
+from .utility import ItemLevel, Item, Quest2pdfException, set_i18n
 from .export import RLInterface
+
+
+_ = set_i18n()
 
 
 class Exam:
@@ -164,7 +168,7 @@ class SerializeExam:
         self._shuffle_item: bool = shuffle_item
         self._shuffle_sub: bool = shuffle_sub
         self._exams_sequence: List[Exam] = []
-        self._correction_top_text: str = f"correttore:"
+        self._correction_top_text: str = _("checker")
         self._to_be_shown: Tuple[str, ...] = to_be_shown
 
     def assignment(self) -> Generator[Item, None, None]:
