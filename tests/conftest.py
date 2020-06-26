@@ -10,6 +10,16 @@ import quest2pdf
 
 
 @pytest.fixture
+def question1():
+    return quest2pdf.Question("q1 text", "q1 image")
+
+
+@pytest.fixture
+def question2():
+    return quest2pdf.Question("q2 text", "q2 image"),
+
+
+@pytest.fixture
 def dummy_exam():
     q1, q2, q3, q4, q5 = (
         quest2pdf.Question("q1 text", "q1 subject", Path("a.png"), 1),

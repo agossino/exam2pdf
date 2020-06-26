@@ -8,55 +8,50 @@ from quest2pdf.utility import ItemLevel
 
 
 def test_exam():
-    """test Exam with no args
+    """GIVEN an empty Exam
+    THEN questions attribute is an empty tuple
     """
     ex = quest2pdf.Exam()
 
     assert ex.questions == tuple()
 
 
-def test_exam_init():
-    """test Exam with one and two arguments
+def test_exam_init(question1, question2):
+    """GIVEN Exam initialized with one/two questions
+    THEN questions attribute have the given questions
     """
-    q1, q2 = (
-        quest2pdf.Question("q1 text", "q1 image"),
-        quest2pdf.Question("q2 text", "q2 image"),
-    )
-    ex1 = quest2pdf.Exam(q1)
-    ex2 = quest2pdf.Exam(q1, q2)
+    ex1 = quest2pdf.Exam(question1)
+    ex2 = quest2pdf.Exam(question1, question2)
 
-    assert ex1.questions == (q1,)
-    assert ex2.questions == (q1, q2)
+    assert ex1.questions == (question1,)
+    assert ex2.questions == (question1, question2)
 
 
-def test_exam_questions_setter0():
-    """test question set
+def test_exam_questions_add(question1, question2):
+    """GIVEN an Exam
+    WHEN add_question two questions
+    THEN added questions are in questions attribute
     """
-    q1, q2 = (
-        quest2pdf.Question("q1 text", "q1 image"),
-        quest2pdf.Question("q2 text", "q2 image"),
-    )
     ex = quest2pdf.Exam()
-    ex.add_question(q1)
-    ex.add_question(q2)
+    ex.add_question(question1)
+    ex.add_question(question2)
 
-    assert q1 in ex.questions
-    assert q2 in ex.questions
+    assert question1 in ex.questions
+    assert question2 in ex.questions
 
 
-def test_exam_questions_setter1():
-    """test question set; question added before overwritten
+def test_exam_questions_add_and_set(question1, question2):
+    """GIVEN an Exam
+    WHEN a question is added
+    AND a tuple with one qwestion is set
+    THEN attribute assignment override the added questions
     """
-    q1, q2 = (
-        quest2pdf.Question("q1 text", "q1 image"),
-        quest2pdf.Question("q2 text", "q2 image"),
-    )
     ex = quest2pdf.Exam()
-    ex.add_question(q1)
-    ex.questions = (q2,)
+    ex.add_question(question1)
+    ex.questions = (question2,)
 
-    assert q1 not in ex.questions
-    assert q2 in ex.questions
+    assert question1 not in ex.questions
+    assert question2 in ex.questions
 
 
 def test_exam_attribute_selector1():
@@ -550,9 +545,12 @@ def test_print_two_exams(tmp_path, dummy_exam_with_img):
     ex.print(file_path, n_copies=n_copies)
 
     for num in range(1, n_copies + 1):
-        out_file = tmp_path / f"{file_path.name}_{num}_{n_copies}.{file_path.suffix}"
+        out_file = tmp_path / f"{file_path.stem}_{num}_{n_copies}{file_path.suffix}"
 
         try:
+            import logging
+
+            logging.warning("file name %s: ", out_file)
             data = out_file.read_bytes()
         except FileNotFoundError:
             assert False, "File not found"
@@ -592,6 +590,7 @@ def test_print_correction1(tmp_path):
     assert correction_data.find(pdf_magic_no) == 1
 
 
+@pytest.mark.interactive
 def test_have_a_look(have_a_look, is_correct):
     """GIVEN a pdf file with some not shuffled question and a correction file
     WHEN they are displayed

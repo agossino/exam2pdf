@@ -87,8 +87,10 @@ class Answer:
 
 class TrueFalseAnswer(Answer):
     def __init__(self, boolean: bool = False, image: Path = Path()):
+        self._true: str = "Vero"
+        self._false: str = "Falso"
         self.boolean: bool = boolean
-        text = "True" if self.boolean else "False"
+        text = self._true if self.boolean else self._false
         super().__init__(text, image)
         self._attr_load_sequence: Tuple[str, ...] = ("boolean", "image")
         self._type_caster_sequence: Tuple[CasterType, ...] = (bool, Path)
@@ -99,7 +101,9 @@ class TrueFalseAnswer(Answer):
 
     @boolean.setter
     def boolean(self, boolean):
-        self._boolean, self._text = (True, "True") if boolean else (False, "False")
+        self._boolean, self._text = (
+            (True, self._true) if boolean else (False, self._false)
+        )
 
 
 class Question:
@@ -386,7 +390,7 @@ class TrueFalseQuest(Question):
             raise ValueError(f"correct_answer argument has never been added")
         pointer = self._answers.index(self._correct_answer)
         self._correct_index = pointer
-        self._correct_option = self.correct_answer.boolean
+        self._correct_option = self.correct_answer.text
 
     @property
     def correct_option(self) -> Optional[str]:
