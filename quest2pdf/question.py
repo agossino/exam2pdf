@@ -3,12 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 from random import shuffle
 from typing import Tuple, Iterator, Any, Optional, List, Iterable, Callable, Union
-from .utility import safe_int, Quest2pdfException
+
+from .utility import safe_int, Quest2pdfException, set_i18n
 
 
 CasterType = Callable[[Any], Any]
 LETTER_A = "A"
 SPACE = " "
+
+_ = set_i18n()
 
 
 class Answer:
@@ -88,7 +91,7 @@ class Answer:
 class TrueFalseAnswer(Answer):
     def __init__(self, boolean: bool = False, image: Path = Path()):
         self.boolean: bool = boolean
-        text = "True" if self.boolean else "False"
+        text = _("True") if self.boolean else _("False")
         super().__init__(text, image)
         self._attr_load_sequence: Tuple[str, ...] = ("boolean", "image")
         self._type_caster_sequence: Tuple[CasterType, ...] = (bool, Path)
@@ -99,7 +102,9 @@ class TrueFalseAnswer(Answer):
 
     @boolean.setter
     def boolean(self, boolean):
-        self._boolean, self._text = (True, "True") if boolean else (False, "False")
+        self._boolean, self._text = (
+            (True, _("True")) if boolean else (False, _("False"))
+        )
 
 
 class Question:
@@ -386,7 +391,7 @@ class TrueFalseQuest(Question):
             raise ValueError(f"correct_answer argument has never been added")
         pointer = self._answers.index(self._correct_answer)
         self._correct_index = pointer
-        self._correct_option = self.correct_answer.boolean
+        self._correct_option = self.correct_answer.text
 
     @property
     def correct_option(self) -> Optional[str]:

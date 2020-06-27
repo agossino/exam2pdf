@@ -1,8 +1,11 @@
 import pytest
 from pathlib import Path
 import random
+
 import quest2pdf
-from quest2pdf.utility import safe_int
+from quest2pdf.utility import safe_int, set_i18n
+
+_ = set_i18n()
 
 
 def test_answer_load_empty():
@@ -154,18 +157,18 @@ def test_answer_print():
     assert f"image: {image}" in a.__str__()
 
 
-def test_truefalse_answer_empty():
+def test_truefalse_answer_empty(set_i18n):
     a = quest2pdf.TrueFalseAnswer()
 
     assert a.boolean is False
-    assert a.text == "False"
+    assert a.text == _("False")
 
 
 def test_truefalse_answer_init_two_args():
     a = quest2pdf.TrueFalseAnswer(True, Path())
 
     assert a.boolean is True
-    assert a.text == "True"
+    assert a.text == _("True")
     assert a.image == Path()
 
 
@@ -174,21 +177,21 @@ def test_truefalse_answer_init_one_arg():
     a.boolean = False
 
     assert a.boolean is False
-    assert a.text == "False"
+    assert a.text == _("False")
 
 
 def test_truefalse_answer_init_num_arg():
     a = quest2pdf.TrueFalseAnswer(1)
 
     assert a.boolean is True
-    assert a.text == "True"
+    assert a.text == _("True")
 
 
 def test_truefalse_answer_init_num_arg0():
     a = quest2pdf.TrueFalseAnswer(0)
 
     assert a.boolean is False
-    assert a.text == "False"
+    assert a.text == _("False")
 
 
 def test_truefalse_answer_attribute():
@@ -775,7 +778,7 @@ def test_truefalse_quest_add_one_answer():
     assert quest.answers == (answer,)
     assert quest.correct_answer == answer
     assert quest.correct_index == 0
-    assert quest.correct_option == answer.boolean
+    assert quest.correct_option == _(repr(answer.boolean))
 
 
 def test_truefalse_quest_add_two_answers():
@@ -789,7 +792,7 @@ def test_truefalse_quest_add_two_answers():
     assert quest.answers == (true_answer, false_answer)
     assert quest.correct_answer == true_answer
     assert quest.correct_index == 0
-    assert quest.correct_option == true_answer.boolean
+    assert quest.correct_option == _(repr(true_answer.boolean))
 
 
 def test_truefalse_question_add_two_true():

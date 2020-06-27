@@ -4,13 +4,17 @@ from pathlib import Path
 import csv
 import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
+
 from .question import Question, TrueFalseQuest
-from .utility import ItemLevel, Item, Quest2pdfException
+from .utility import ItemLevel, Item, Quest2pdfException, set_i18n
 from .export import RLInterface
 
 
+_ = set_i18n()
+
+
 class Exam:
-    """Exam is a sequence of Question managed as a whole.
+    """Exam is a sequence of Questions managed as a whole.
     """
 
     def __init__(self, *args: Question):
@@ -44,10 +48,6 @@ class Exam:
     def add_question(self, question: Question) -> None:
         """Add one question to the sequence.
         """
-        # if isinstance(question, Question):
-        #     self._questions.append(question)
-        # else:
-        #     raise TypeError(f"{question} is not a Question")
         self._questions.append(question)
 
     def add_path_parent(self, file_path: Path):
@@ -100,7 +100,10 @@ class Exam:
         """Print in PDF all the questions and correction
         """
         questions_serialized = SerializeExam(
-            self, shuffle_item=questions_shuffle, shuffle_sub=answers_shuffle
+            self,
+            shuffle_item=questions_shuffle,
+            shuffle_sub=answers_shuffle,
+            to_be_shown=("subject", "text"),
         )
 
         heading = exam_file_name.name if heading == "" else heading
@@ -109,7 +112,7 @@ class Exam:
             if n_copies > 1:
                 file_name = (
                     exam_file_name.parent
-                    / f"{exam_file_name.name}_{number}_{n_copies}.{exam_file_name.suffix}"
+                    / f"{exam_file_name.stem}_{number}_{n_copies}{exam_file_name.suffix}"
                 )
             else:
                 file_name = exam_file_name
@@ -155,18 +158,28 @@ class SerializeExam:
     """
 
     def __init__(
-        self, exam: Exam, shuffle_item: bool = False, shuffle_sub: bool = False
+        self,
+        exam: Exam,
+        shuffle_item: bool = False,
+        shuffle_sub: bool = False,
+        to_be_shown: Tuple[str, ...] = ("text",),
     ):
         self._exam: Exam = exam
         self._shuffle_item: bool = shuffle_item
         self._shuffle_sub: bool = shuffle_sub
         self._exams_sequence: List[Exam] = []
-        self._correction_top_text: str = f"correction:"
+        self._correction_top_text: str = _("checker")
+        self._to_be_shown: Tuple[str, ...] = to_be_shown
 
     def assignment(self) -> Generator[Item, None, None]:
         exam = self._get_a_shuffled_copy()
         for question in exam.questions:
-            yield Item(ItemLevel.top, question.text, question.image)
+            text_shown = [
+                str(getattr(question, name, ""))
+                for name in self._to_be_shown
+                if str(getattr(question, name, "")) != ""
+            ]
+            yield Item(ItemLevel.top, " - ".join(text_shown), question.image)
             for answer in question.answers:
                 yield Item(ItemLevel.sub, answer.text, answer.image)
 

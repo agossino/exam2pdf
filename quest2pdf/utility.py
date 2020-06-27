@@ -2,6 +2,8 @@ import re
 from typing import List
 from collections import namedtuple
 from enum import Enum
+import gettext
+from pathlib import Path
 
 
 class Quest2pdfException(BaseException):
@@ -42,3 +44,10 @@ def safe_int(text: str) -> int:
         return int(text)
     except ValueError:
         return 0
+
+
+def set_i18n():
+    this_script_path = Path(__file__)
+    locales = this_script_path.parent / "locales"
+    trans = gettext.translation("quest2pdf", localedir=str(locales), fallback=True)
+    return trans.gettext
