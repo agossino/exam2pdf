@@ -8,7 +8,7 @@ clean:
 	python setup clean --all
 
 black:
-	black quest2pdf/
+	black exam2pdf/
 	black tests/unit/
 
 build:
