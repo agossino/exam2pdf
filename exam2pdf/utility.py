@@ -1,13 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import re
-import logging
 from typing import List
 from collections import namedtuple
 from enum import Enum
-
-LOGNAME = "quest2pdf"
-LOGGER = logging.getLogger(LOGNAME)
+import gettext
+from pathlib import Path
 
 
 class Quest2pdfException(BaseException):
@@ -40,10 +36,7 @@ def exception_printer(exception_instance: Exception) -> str:
     """
     pattern: str = r"\W+"
     exc_list: List[str] = re.split(pattern, str(exception_instance.__class__))
-    try:
-        return exc_list[2] + ": " + str(exception_instance)
-    except IndexError:
-        return str(exception_instance)
+    return exc_list[2] + ": " + str(exception_instance)
 
 
 def safe_int(text: str) -> int:
@@ -51,3 +44,10 @@ def safe_int(text: str) -> int:
         return int(text)
     except ValueError:
         return 0
+
+
+def set_i18n():
+    this_script_path = Path(__file__)
+    locales = this_script_path.parent / "locales"
+    trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
+    return trans.gettext

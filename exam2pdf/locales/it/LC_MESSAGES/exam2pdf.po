@@ -1,0 +1,39 @@
+# exam2pdf library translation.
+# Copyright (C) 2020 Alfio Giancarlo Ossino
+# This file is distributed under the same license as the exam2pdf library package.
+# A.G. Ossino <gcossino@gmail.com>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-06-26 16:21+0200\n"
+"PO-Revision-Date: 2020-06-26 22:35+0200\n"
+"Last-Translator: A.G. Ossino\n"
+"Language-Team: A.G. Ossino\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: exam2pdf/exam.py:173 tests/unit/test_exam.py:713
+msgid "checker"
+msgstr "correttore"
+
+#: exam2pdf/question.py:97 exam2pdf/question.py:109
+#: tests/unit/test_exam.py:646 tests/unit/test_exam.py:648
+#: tests/unit/test_question.py:173 tests/unit/test_question.py:189
+msgid "True"
+msgstr "Vero"
+
+#: exam2pdf/question.py:97 exam2pdf/question.py:109
+#: tests/unit/test_exam.py:383 tests/unit/test_exam.py:404
+#: tests/unit/test_exam.py:428 tests/unit/test_exam.py:647
+#: tests/unit/test_exam.py:649 tests/unit/test_question.py:166
+#: tests/unit/test_question.py:182 tests/unit/test_question.py:196
+msgid "False"
+msgstr "Falso"
+
+
+

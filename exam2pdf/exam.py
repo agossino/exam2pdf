@@ -1,18 +1,20 @@
+from __future__ import annotations
+
 from pathlib import Path
 import csv
+import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
-import logging
-from .question import Question, MultiChoiceQuest, TrueFalseQuest
-from .utility import ItemLevel, Item, Quest2pdfException
+
+from .question import Question, TrueFalseQuest
+from .utility import ItemLevel, Item, Quest2pdfException, set_i18n
 from .export import RLInterface
 
 
-LOGNAME = "quest2pdf." + __name__
-LOGGER = logging.getLogger(LOGNAME)
+_ = set_i18n()
 
 
 class Exam:
-    """Exam is a sequence of Question managed as a whole.
+    """Exam is a sequence of Questions managed as a whole.
     """
 
     def __init__(self, *args: Question):
@@ -46,10 +48,6 @@ class Exam:
     def add_question(self, question: Question) -> None:
         """Add one question to the sequence.
         """
-        # if isinstance(question, Question):
-        #     self._questions.append(question)
-        # else:
-        #     raise TypeError(f"{question} is not a Question")
         self._questions.append(question)
 
     def add_path_parent(self, file_path: Path):
@@ -57,10 +55,7 @@ class Exam:
             question.add_parent_path(file_path)
 
     def load(self, iterable: Iterable[Mapping[str, Any]]) -> None:
-        questions_classes = {
-            "MultiChoice": MultiChoiceQuest,
-            "TrueFalse": TrueFalseQuest,
-        }
+        questions_classes = {"MultiChoice": Question, "TrueFalse": TrueFalseQuest}
         default_key = "MultiChoice"
         for row in iterable:
             quest = questions_classes[row.get(self._question_type_key, default_key)]()
@@ -86,30 +81,50 @@ class Exam:
         self.load(rows)
         self.add_path_parent(file_path)
 
+    def copy(self) -> Exam:
+        questions = (question.copy() for question in self.questions)
+        new_exam = Exam(*questions)
+        return new_exam
+
     def print(
         self,
         exam_file_name: Path,
         correction_file_name: Optional[Path] = None,
-        shuffle: bool = True,
+        answers_shuffle: bool = False,
+        questions_shuffle: bool = False,
         destination: Path = Path(),
+        n_copies: int = 1,
         heading: str = "",
         footer: str = "",
     ) -> None:
         """Print in PDF all the questions and correction
         """
-        if shuffle:
-            self.shuffle()
-
-        questions_serialized = SerializeExam(self.questions)
-
-        interface = RLInterface(
-            questions_serialized.assignment(),
-            exam_file_name,
-            destination=destination,
-            heading=heading,
-            footer=footer,
+        questions_serialized = SerializeExam(
+            self,
+            shuffle_item=questions_shuffle,
+            shuffle_sub=answers_shuffle,
+            to_be_shown=("subject", "text"),
         )
-        interface.build()
+
+        heading = exam_file_name.name if heading == "" else heading
+
+        for number in range(1, n_copies + 1):
+            if n_copies > 1:
+                file_name = (
+                    exam_file_name.parent
+                    / f"{exam_file_name.stem}_{number}_{n_copies}{exam_file_name.suffix}"
+                )
+            else:
+                file_name = exam_file_name
+
+            interface = RLInterface(
+                questions_serialized.assignment(),
+                file_name,
+                destination=destination,
+                heading=f"{heading} {number}/{n_copies}",
+                footer=footer,
+            )
+            interface.build()
 
         if correction_file_name is not None:
             interface = RLInterface(
@@ -123,9 +138,12 @@ class Exam:
             )
             interface.build()
 
-    def shuffle(self):
-        for question in self._questions:
+    def answers_shuffle(self):
+        for question in self.questions:
             question.shuffle()
+
+    def questions_shuffle(self):
+        random.shuffle(self._questions)
 
     def __str__(self) -> str:
         output: List[str] = []
@@ -139,17 +157,50 @@ class SerializeExam:
     answers, made of text and image.
     """
 
-    def __init__(self, serial_data: Iterable):
-        self._serial_data: Iterable = serial_data
+    def __init__(
+        self,
+        exam: Exam,
+        shuffle_item: bool = False,
+        shuffle_sub: bool = False,
+        to_be_shown: Tuple[str, ...] = ("text",),
+    ):
+        self._exam: Exam = exam
+        self._shuffle_item: bool = shuffle_item
+        self._shuffle_sub: bool = shuffle_sub
+        self._exams_sequence: List[Exam] = []
+        self._correction_top_text: str = _("checker")
+        self._to_be_shown: Tuple[str, ...] = to_be_shown
 
     def assignment(self) -> Generator[Item, None, None]:
-        for question in self._serial_data:
-            yield Item(ItemLevel.top, question.text, question.image)
+        exam = self._get_a_shuffled_copy()
+        for question in exam.questions:
+            text_shown = [
+                str(getattr(question, name, ""))
+                for name in self._to_be_shown
+                if str(getattr(question, name, "")) != ""
+            ]
+            yield Item(ItemLevel.top, " - ".join(text_shown), question.image)
             for answer in question.answers:
                 yield Item(ItemLevel.sub, answer.text, answer.image)
 
     def correction(self) -> Generator[Item, None, None]:
-        if self._serial_data != ():
-            yield Item(ItemLevel.top, f"correction", Path("."))
-        for question in self._serial_data:
-            yield Item(ItemLevel.sub, f"{question.correct_option}", Path("."))
+        total_copies = len(self._exams_sequence)
+        for copy_number, exam in enumerate(self._exams_sequence, 1):
+            if exam.questions != ():
+                top_text = f"{self._correction_top_text} {copy_number}/{total_copies}"
+                yield Item(ItemLevel.top, top_text, Path("."))
+            for question in exam.questions:
+                yield Item(ItemLevel.sub, f"{question.correct_option}", Path("."))
+
+    def _get_a_shuffled_copy(self) -> Exam:
+        exam = self._exam.copy()
+
+        if self._shuffle_item:
+            exam.questions_shuffle()
+
+        if self._shuffle_sub:
+            exam.answers_shuffle()
+
+        self._exams_sequence.append(exam)
+
+        return exam

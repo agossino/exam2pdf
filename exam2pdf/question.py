@@ -1,24 +1,56 @@
-import logging
+from __future__ import annotations
+
 from pathlib import Path
 from random import shuffle
-from typing import Tuple, Iterator, Any, Optional, List, Iterable, Callable
-from .utility import safe_int, Quest2pdfException
+from typing import Tuple, Iterator, Any, Optional, List, Iterable, Callable, Union
 
-# from .utility import safe_int
+from .utility import safe_int, Quest2pdfException, set_i18n
 
 
 CasterType = Callable[[Any], Any]
 LETTER_A = "A"
 SPACE = " "
 
+_ = set_i18n()
+
 
 class Answer:
     """An answer with optional image.
-    """
+        """
 
-    def __init__(self):
-        self._attr_load_sequence: Tuple[str] = tuple()
-        self._type_caster_sequence: Tuple[CasterType, ...] = tuple()
+    def __init__(self, text: str = "", image: Path = Path()):
+        self.text: str = text
+        self.image: Path = image
+        super().__init__()
+        self._attr_load_sequence: Tuple[str, ...] = ("text", "image")
+        self._type_caster_sequence: Tuple[CasterType, ...] = (str, Path)
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @text.setter
+    def text(self, text: str) -> None:
+        """Text is the answer.
+        """
+        if isinstance(text, str):
+            self._text = text
+        else:
+            raise TypeError(f"{text} is not a string")
+
+    @property
+    def image(self) -> Path:
+        """Image associated with the answer: it can help or
+        can be the answer.
+        """
+        return self._image
+
+    @image.setter
+    def image(self, file_path: Path) -> None:
+        if isinstance(file_path, Path):
+            self._image = file_path
+        else:
+            raise TypeError(f"{file_path} is not a Path")
 
     @property
     def attr_load_sequence(self) -> Tuple[str, ...]:
@@ -56,48 +88,11 @@ class Answer:
         return "".join(output)
 
 
-class MultiChoiceAnswer(Answer):
-    def __init__(self, text: str = "", image: Path = Path()):
-        self.text: str = text
-        self.image: Path = image
-        super().__init__()
-        self._attr_load_sequence: Tuple[str, ...] = ("text", "image")
-        self._type_caster_sequence: Tuple[CasterType, ...] = (str, Path)
-
-    @property
-    def text(self) -> str:
-        return self._text
-
-    @text.setter
-    def text(self, text: str) -> None:
-        """Text is the answer.
-        """
-        if isinstance(text, str):
-            self._text = text
-        else:
-            raise TypeError(f"{text} is not a string")
-
-    @property
-    def image(self) -> Path:
-        """Image associated with the answer: it can help or
-        can be the answer.
-        """
-        return self._image
-
-    @image.setter
-    def image(self, file_path: Path) -> None:
-        if isinstance(file_path, Path):
-            self._image = file_path
-        else:
-            raise TypeError(f"{file_path} is not a Path")
-
-
 class TrueFalseAnswer(Answer):
     def __init__(self, boolean: bool = False, image: Path = Path()):
         self.boolean: bool = boolean
-        self.image: Path = image
-        self._text = "True" if self.boolean else "False"
-        super().__init__()
+        text = _("True") if self.boolean else _("False")
+        super().__init__(text, image)
         self._attr_load_sequence: Tuple[str, ...] = ("boolean", "image")
         self._type_caster_sequence: Tuple[CasterType, ...] = (bool, Path)
 
@@ -107,25 +102,9 @@ class TrueFalseAnswer(Answer):
 
     @boolean.setter
     def boolean(self, boolean):
-        self._boolean, self._text = (True, "True") if boolean else (False, "False")
-
-    @property
-    def image(self) -> Path:
-        """Image associated with the answer: it can help or
-        can be the answer.
-        """
-        return self._image
-
-    @image.setter
-    def image(self, file_path: Path) -> None:
-        if isinstance(file_path, Path):
-            self._image = file_path
-        else:
-            raise TypeError(f"{file_path} is not a Path")
-
-    @property
-    def text(self):
-        return self._text
+        self._boolean, self._text = (
+            (True, _("True")) if boolean else (False, _("False"))
+        )
 
 
 class Question:
@@ -142,8 +121,8 @@ class Question:
         self.image: Path = image
         self.level: int = level
         self._answer_type = Answer
-        self._answers: List[self._answer_type] = []
-        self._correct_answer: Optional[self._answer_type] = None  # setter bypassed
+        self._answers: List[Answer] = []
+        self._correct_answer: Optional[Answer] = None  # setter bypassed
         self._correct_index: Optional[int] = None  # setter bypassed
         self._attr_load_sequence: Tuple[str, ...] = (
             "text",
@@ -153,6 +132,9 @@ class Question:
         )
         self._type_caster_sequence: Tuple[CasterType, ...] = (str, str, Path, safe_int)
         self._marker = "*"
+        self._correct_option: Optional[str] = None  # setter bypassed
+        self._answer_type = Answer
+        self._answers: List[Answer] = []
 
     @property
     def text(self) -> str:
@@ -207,11 +189,13 @@ class Question:
             raise TypeError(f"{value} is not an int")
 
     @property
-    def answers(self) -> Tuple[Answer, ...]:
+    def answers(self) -> Union[Tuple[Answer], Tuple[TrueFalseAnswer]]:
         return tuple(self._answers)
 
     @answers.setter
-    def answers(self, values: Iterable[Answer]) -> None:
+    def answers(
+        self, values: Union[Iterable[Answer], Iterable[TrueFalseAnswer]]
+    ) -> None:
         """Set answers given a sequence of them, overriding any
         previous data.
         """
@@ -221,7 +205,7 @@ class Question:
 
         list(map(self.add_answer, values))
 
-    def add_answer(self, answer, is_correct: bool = False) -> None:
+    def add_answer(self, answer: Answer, is_correct: bool = False) -> None:
         """Add an Answer. Correct answer is set.
         The first answer is the correct one: successive answers
         are set accordingly to is_correct argument.
@@ -244,7 +228,7 @@ class Question:
             raise ValueError(f"correct_answer argument has never been added")
         pointer = self._answers.index(self._correct_answer)
         self._correct_index = pointer
-        # self._correct_letter = chr(ord(LETTER_A) + pointer)
+        self._correct_option = chr(ord(LETTER_A) + self.correct_index)
 
     @property
     def correct_index(self) -> Optional[int]:
@@ -255,11 +239,32 @@ class Question:
         """Set the correct answer given its index.
         """
         try:
-            self._correct_answer = self._answers[value]
+            self.correct_answer = self._answers[value]
         except IndexError as index_error:
             raise ValueError(f"no answer with index {value}") from index_error
-        self._correct_index = value
-        # self._correct_letter = chr(ord(LETTER_A) + value)
+
+    @property
+    def correct_option(self) -> Optional[str]:
+        return self._correct_option
+
+    @correct_option.setter
+    def correct_option(self, value: str) -> None:
+        """Set the correct answer according to the given letter,
+        where the first answer added is labeled A"""
+        try:
+            pointer = ord(value) - ord(LETTER_A)
+            self.correct_answer = self._answers[pointer]
+        except IndexError as index_error:
+            raise ValueError(f"no answer with letter {value}") from index_error
+
+    def shuffle(self) -> None:
+        """Shuffle the answers.
+        """
+        if self._correct_answer:
+            shuffle(self._answers)
+            pointer = self._answers.index(self._correct_answer)
+            self._correct_index = pointer
+            self._correct_option = chr(ord(LETTER_A) + pointer)
 
     def add_parent_path(self, file_path: Path) -> None:
         """Add the given path to all images. If the given path is not a
@@ -343,6 +348,13 @@ class Question:
             raise
         return attributes
 
+    def copy(self) -> Question:
+        new_quest: Question = Question(self.text, self.subject, self.image, self.level)
+        new_quest.answers = self.answers
+        if self.correct_index is not None:
+            new_quest.correct_index = self.correct_index
+        return new_quest
+
     def __str__(self) -> str:
         output: List[str] = [f"{self.__class__}\n"]
         for attribute in self._attr_load_sequence:
@@ -356,60 +368,44 @@ class Question:
         return "".join(output)
 
 
-class MultiChoiceQuest(Question):
-    """Multi choice question.
+class TrueFalseQuest(Question):
+    """True/False question.
     """
 
     def __init__(self, *args):
-        self._correct_option: Optional[str] = None  # setter bypassed
         super().__init__(*args)
-        self._answer_type = MultiChoiceAnswer
-        self._answers: List[self._answer_type] = []
+        self._answer_type = TrueFalseAnswer
+        self._answers: List[TrueFalseAnswer] = []
 
-    @Question.correct_answer.setter
+    @property
+    def correct_answer(self):
+        return self._correct_answer
+
+    @correct_answer.setter
     def correct_answer(self, value) -> None:
         """Set the given answer as the correct one.
         """
-        Question.correct_answer.fset(self, value)
-        self._correct_option = chr(ord(LETTER_A) + self.correct_index)
+        if value in self._answers:
+            self._correct_answer = value
+        else:
+            raise ValueError(f"correct_answer argument has never been added")
+        pointer = self._answers.index(self._correct_answer)
+        self._correct_index = pointer
+        self._correct_option = self.correct_answer.text
 
     @property
     def correct_option(self) -> Optional[str]:
         return self._correct_option
 
     @correct_option.setter
-    def correct_option(self, value: str) -> None:
-        """Set the correct answer according to the given letter,
-        where the first answer added is labeled A"""
-        try:
-            pointer = ord(value) - ord(LETTER_A)
-            self._correct_answer = self._answers[pointer]
-        except IndexError as index_error:
-            raise ValueError(f"no answer with letter {value}") from index_error
-        self._correct_index = pointer
-        self._correct_option = chr(ord(LETTER_A) + pointer)
-
-    def shuffle(self) -> None:
-        """Shuffle the answers.
+    def correct_option(self, value: bool) -> None:
+        """Set the correct answer according to the boolean
         """
-        if self._correct_answer:
-            shuffle(self._answers)
-            pointer = self._answers.index(self._correct_answer)
-            self._correct_index = pointer
-            self._correct_option = chr(ord(LETTER_A) + pointer)
+        for answer in self.answers:
+            if answer.boolean == value:
+                self.correct_answer = answer
 
-
-class TrueFalseQuest(Question):
-    """Multi choice question.
-    """
-
-    def __init__(self, *args):
-        super().__init__(*args)
-        self._answer_type = TrueFalseAnswer
-        self._answers: List[self._answer_type] = []
-        self.correct_option: str = ""
-
-    def add_answer(self, answer, is_correct: bool = False) -> None:
+    def add_answer(self, answer: TrueFalseAnswer, is_correct: bool = False) -> None:
         """Add an Answer. Correct answer is set.
         The first answer is the correct one: successive answers
         are set accordingly to is_correct argument.
@@ -417,14 +413,12 @@ class TrueFalseQuest(Question):
         if len(self._answers) == 0:
             self._answers.append(answer)
             self.correct_answer = answer
-            self.correct_option = self.correct_answer.boolean
         elif len(self._answers) == 1:
             if answer.boolean == self._correct_answer.boolean:
                 raise ValueError("Only two alternative answers are allowed")
             self._answers.append(answer)
             if is_correct:
                 self.correct_answer = answer
-                self.correct_option = self.correct_answer.boolean
         else:
             raise ValueError("Only two alternative answers are allowed")
 
@@ -458,3 +452,12 @@ class TrueFalseQuest(Question):
                 self.correct_option = self.correct_answer.boolean
         except IndexError:
             pass
+
+    def copy(self) -> Question:
+        new_quest: TrueFalseQuest = TrueFalseQuest(
+            self.text, self.subject, self.image, self.level
+        )
+        new_quest.answers = self.answers
+        if self.correct_index is not None:
+            new_quest.correct_index = self.correct_index
+        return new_quest
