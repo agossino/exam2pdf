@@ -2,8 +2,8 @@ import pytest
 from pathlib import Path
 import random
 
-import quest2pdf
-from quest2pdf.utility import safe_int, set_i18n
+import exam2pdf
+from exam2pdf.utility import safe_int, set_i18n
 
 _ = set_i18n()
 
@@ -11,7 +11,7 @@ _ = set_i18n()
 def test_answer_load_empty():
     """test empty iterator
     """
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     a._attr_load_sequence = ("A",)
     a._type_caster_sequence = (str,)
     try:
@@ -23,7 +23,7 @@ def test_answer_load_empty():
 def test_answer_load_one_item0():
     """test iterator with one item
     """
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     a._attr_load_sequence = ("text",)
     a._type_caster_sequence = (str,)
     test_tuple = ("x",)
@@ -41,7 +41,7 @@ def test_answer_load_one_item1():
     """test iterator with one item,
     two attributes
     """
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     a._attr_load_sequence = ("text", "image")
     a._type_caster_sequence = (str, Path)
     test_tuple = ("x",)
@@ -57,7 +57,7 @@ def test_answer_load_two_items0():
     """test iterator with two items,
      one attribute; test last item left in the iterator
     """
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     a._attr_load_sequence = ("text",)
     a._type_caster_sequence = (str,)
     test_tuple = ("a", "abc")
@@ -72,7 +72,7 @@ def test_answer_load_two_items0():
 def test_answer_init_default():
     """test default arguments
     """
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
 
     assert a.text == ""
     assert a.image == Path()
@@ -83,7 +83,7 @@ def test_answer_init():
     """
     text = "text"
     image = Path("my_pic.jpg")
-    a = quest2pdf.Answer(text, image)
+    a = exam2pdf.Answer(text, image)
 
     assert a.text == text
     assert a.image == image
@@ -95,7 +95,7 @@ def test_answer_init_wrong_test():
     image = Path()
 
     with pytest.raises(TypeError):
-        quest2pdf.Answer(image)
+        exam2pdf.Answer(image)
 
 
 def test_answer_init_wrong_image():
@@ -103,13 +103,13 @@ def test_answer_init_wrong_image():
     """
     text = "text"
     with pytest.raises(TypeError):
-        quest2pdf.Answer(image=text)
+        exam2pdf.Answer(image=text)
 
 
 def test_answer_attributes():
     """Test sequence attributes
     """
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     expected_attr_load_sequence = ("text", "image")
     expected_type_caster_sequence = (str, Path)
 
@@ -127,7 +127,7 @@ def test_answer_attributes():
     ],
 )
 def test_answer_set(attribute, expected):
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     try:
         setattr(a, attribute, expected)
     except TypeError:
@@ -137,7 +137,7 @@ def test_answer_set(attribute, expected):
 
 
 def test_answer_load():
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     test_tuple = ("text",)
 
     with pytest.raises(StopIteration):
@@ -147,7 +147,7 @@ def test_answer_load():
 
 
 def test_answer_print():
-    a = quest2pdf.Answer()
+    a = exam2pdf.Answer()
     text = "Answer text"
     image = "home/mydir/image.jpg"
     i = iter((text, image))
@@ -158,14 +158,14 @@ def test_answer_print():
 
 
 def test_truefalse_answer_empty(set_i18n):
-    a = quest2pdf.TrueFalseAnswer()
+    a = exam2pdf.TrueFalseAnswer()
 
     assert a.boolean is False
     assert a.text == _("False")
 
 
 def test_truefalse_answer_init_two_args():
-    a = quest2pdf.TrueFalseAnswer(True, Path())
+    a = exam2pdf.TrueFalseAnswer(True, Path())
 
     assert a.boolean is True
     assert a.text == _("True")
@@ -173,7 +173,7 @@ def test_truefalse_answer_init_two_args():
 
 
 def test_truefalse_answer_init_one_arg():
-    a = quest2pdf.TrueFalseAnswer(True)
+    a = exam2pdf.TrueFalseAnswer(True)
     a.boolean = False
 
     assert a.boolean is False
@@ -181,21 +181,21 @@ def test_truefalse_answer_init_one_arg():
 
 
 def test_truefalse_answer_init_num_arg():
-    a = quest2pdf.TrueFalseAnswer(1)
+    a = exam2pdf.TrueFalseAnswer(1)
 
     assert a.boolean is True
     assert a.text == _("True")
 
 
 def test_truefalse_answer_init_num_arg0():
-    a = quest2pdf.TrueFalseAnswer(0)
+    a = exam2pdf.TrueFalseAnswer(0)
 
     assert a.boolean is False
     assert a.text == _("False")
 
 
 def test_truefalse_answer_attribute():
-    a = quest2pdf.TrueFalseAnswer(True)
+    a = exam2pdf.TrueFalseAnswer(True)
     expected_attr_load_sequence = ("boolean", "image")
     expected_type_caster_sequence = (bool, Path)
 
@@ -206,7 +206,7 @@ def test_truefalse_answer_attribute():
 def test_question_default():
     """Test default arguments
     """
-    q = quest2pdf.Question()
+    q = exam2pdf.Question()
     expected = ""
 
     assert q.text == expected
@@ -218,7 +218,7 @@ def test_question_default():
 def test_question_init(text, subject, image, level):
     """Test arguments assignments
     """
-    q = quest2pdf.Question(text, subject=subject, image=image, level=level)
+    q = exam2pdf.Question(text, subject=subject, image=image, level=level)
 
     assert q.text == text
     assert q.subject == subject
@@ -242,13 +242,13 @@ def test_question_get(attribute, expected):
     """Test default attribute values
     """
     text = "What's your name?"
-    q = quest2pdf.Question(text)
+    q = exam2pdf.Question(text)
 
     assert getattr(q, attribute) == expected
 
 
 def test_question_get_type_caster():
-    q = quest2pdf.Question()
+    q = exam2pdf.Question()
     assert len(q.type_caster_sequence) == 4
 
 
@@ -267,7 +267,7 @@ def test_question_get_type_caster():
 def test_question_set(attribute, expected):
     """Test set right and wrong attribute
     """
-    q = quest2pdf.Question()
+    q = exam2pdf.Question()
     try:
         setattr(q, attribute, expected)
     except TypeError:
@@ -280,8 +280,8 @@ def test_question_answer_add_one():
     """Test one answer addition
     and correctness
     """
-    q = quest2pdf.Question("Who are you?")
-    a = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a = exam2pdf.Answer()
     q.add_answer(a)
 
     assert a in q.answers
@@ -293,9 +293,9 @@ def test_question_answer_add_two():
     """Test two answers addition
     and correctness
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
-    a2 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
+    a2 = exam2pdf.Answer()
     q.add_answer(a1)
     q.add_answer(a2)
 
@@ -309,11 +309,11 @@ def test_question_answer_setter():
     previous addition and
     correctness
     """
-    q = quest2pdf.Question("Who are you?")
-    a = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a = exam2pdf.Answer()
     q.add_answer(a)
-    b = quest2pdf.Answer()
-    c = quest2pdf.Answer()
+    b = exam2pdf.Answer()
+    c = exam2pdf.Answer()
     q.answers = (b, c)
 
     assert a not in q.answers
@@ -327,9 +327,9 @@ def test_question_answer_correct_set():
     """Test correctness of the last
     answer added when set correct
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
-    a2 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
+    a2 = exam2pdf.Answer()
     q.add_answer(a2)
     q.add_answer(a1, True)
 
@@ -341,8 +341,8 @@ def test_question_answer_correct_false():
     """Test ineffectiveness of correct setting
     for the first answer added
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
     q.add_answer(a1, False)
 
     assert q.correct_answer == a1
@@ -351,9 +351,9 @@ def test_question_answer_correct_false():
 def test_question_correct_answer_set():
     """Test set correct answer
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
-    a2 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
+    a2 = exam2pdf.Answer()
     q.add_answer(a1)
     q.add_answer(a2)
     q.correct_answer = a2
@@ -365,9 +365,9 @@ def test_question_correct_answer_set():
 def test_question_correct_index_set():
     """Test set correct answer index
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
-    a2 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
+    a2 = exam2pdf.Answer()
     q.add_answer(a1)
     q.add_answer(a2)
     q.correct_index = 1
@@ -379,10 +379,10 @@ def test_question_correct_index_set():
 def test_question_correct_answer_invalid():
     """Test set invalid correct answer
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
-    a2 = quest2pdf.Answer()
-    a3 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
+    a2 = exam2pdf.Answer()
+    a3 = exam2pdf.Answer()
     q.add_answer(a1)
     q.add_answer(a2)
     with pytest.raises(ValueError):
@@ -392,19 +392,19 @@ def test_question_correct_answer_invalid():
 def test_question_correct_index_invalid():
     """Test set invalid correct answer index
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer()
-    a2 = quest2pdf.Answer()
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer()
+    a2 = exam2pdf.Answer()
     q.add_answer(a1)
     q.add_answer(a2)
     with pytest.raises(ValueError):
         q.correct_index = 2
 
 
-A1 = quest2pdf.Answer()
-A2 = quest2pdf.Answer()
-A3 = quest2pdf.Answer()
-A4 = quest2pdf.Answer()
+A1 = exam2pdf.Answer()
+A2 = exam2pdf.Answer()
+A3 = exam2pdf.Answer()
+A4 = exam2pdf.Answer()
 
 
 @pytest.mark.parametrize(
@@ -418,7 +418,7 @@ A4 = quest2pdf.Answer()
 def test_question_set_correct(attribute_set, expected, attribute1_get, expected1):
     """Test correct set by answer and index
     """
-    q = quest2pdf.Question("Who are you?")
+    q = exam2pdf.Question("Who are you?")
     q.add_answer(A1)
     q.add_answer(A2)
     q.add_answer(A3)
@@ -437,11 +437,11 @@ def test_question_add_path_parent0():
     """Test whether not existing file path is added to Answer.image
     """
     path = Path("home/my_home/file.txt")
-    quest = quest2pdf.Question("question text", image=Path())
+    quest = exam2pdf.Question("question text", image=Path())
     image_path = Path("image1.png")
-    answer_1 = quest2pdf.Answer()
+    answer_1 = exam2pdf.Answer()
     answer_1.image = image_path
-    answer_2 = quest2pdf.Answer()
+    answer_2 = exam2pdf.Answer()
     answer_2.image = Path()
     quest.answers = (answer_1, answer_2)
     quest.add_parent_path(path)
@@ -458,10 +458,10 @@ def test_question_add_path_parent1(tmp_path):
     folder_path = tmp_path / "home"
     folder_path.mkdir()
     image_path = Path("image1.png")
-    quest = quest2pdf.Question("question text", image=image_path)
-    answer_1 = quest2pdf.Answer()
+    quest = exam2pdf.Question("question text", image=image_path)
+    answer_1 = exam2pdf.Answer()
     answer_1.image = Path()
-    answer_2 = quest2pdf.Answer()
+    answer_2 = exam2pdf.Answer()
     answer_2.image = image_path
     quest.answers = (answer_1, answer_2)
     quest.add_parent_path(folder_path)
@@ -475,7 +475,7 @@ def test_question_load_empty():
     """Empty iterator.
     """
     test_tuple = ()
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     quest.load_sequentially(iter(test_tuple))
 
     assert quest.text == ""
@@ -490,7 +490,7 @@ def test_question_load_partial():
     no answer.
     """
     test_tuple = ("t1", "s1")
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     quest.load_sequentially(iter(test_tuple))
 
     assert quest.text == test_tuple[0]
@@ -505,7 +505,7 @@ def test_question_load_full():
     no answer.
     """
     test_tuple = ("t1", "s1", "p1", "1")
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     quest.load_sequentially(iter(test_tuple))
 
     assert quest.text == test_tuple[0]
@@ -519,14 +519,14 @@ def test_question_load_full_answer(monkeypatch):
     """load a complete question and answer
     """
 
-    class MonkeyAnswer(quest2pdf.Answer):
+    class MonkeyAnswer(exam2pdf.Answer):
         def __init__(self):
             super().__init__()
             self._attr_load_sequence = ("text",)
             self._type_caster_sequence = (str,)
 
     test_tuple = ("t1", "s1", "p1", "1", "a1")
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     monkeypatch.setattr(quest, "_answer_type", MonkeyAnswer)
     quest.load_sequentially(iter(test_tuple))
 
@@ -541,14 +541,14 @@ def test_question_load_two_answer(monkeypatch):
     """load a complete question and two answers
     """
 
-    class MonkeyAnswer(quest2pdf.Answer):
+    class MonkeyAnswer(exam2pdf.Answer):
         def __init__(self):
             super().__init__()
             self._attr_load_sequence = ("text", "image")
             self._type_caster_sequence = (str, Path)
 
     test_tuple = ("t1", "s1", "p1", "1", "a00", Path("a01"), "a10")
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     monkeypatch.setattr(quest, "_answer_type", MonkeyAnswer)
     quest.load_sequentially(iter(test_tuple))
 
@@ -564,7 +564,7 @@ def test_question_load_two_answer(monkeypatch):
 def test_question_print():
     """test __str__ method
     """
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     quest_text = "Text"
     quest_subject = "Subject"
     quest_image = "dir/ec/tor/y"
@@ -581,7 +581,7 @@ def test_question_print():
 def test_question_init_empty():
     """test init with no answer
     """
-    q = quest2pdf.Question()
+    q = exam2pdf.Question()
 
     assert q.text == ""
     assert q.subject == ""
@@ -593,7 +593,7 @@ def test_question_init_all_args():
     """test init with no answer
     """
     text, subject, image, level = ("q text", "q subject", Path("image.png"), 2)
-    q = quest2pdf.Question(text, subject, image, level)
+    q = exam2pdf.Question(text, subject, image, level)
 
     assert q.text == text
     assert q.subject == subject
@@ -604,8 +604,8 @@ def test_question_init_all_args():
 def test_question_add_one_answer():
     """Test add answer
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer("That's me.")
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer("That's me.")
     q.add_answer(a1)
 
     assert q.correct_answer == a1
@@ -616,9 +616,9 @@ def test_question_add_one_answer():
 def test_question_add_two_answers():
     """Test add answer
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer("That's me.")
-    a2 = quest2pdf.Answer("That's you.")
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer("That's me.")
+    a2 = exam2pdf.Answer("That's you.")
     q.add_answer(a1), q.add_answer(a2)
     q.correct_option = "B"
 
@@ -630,9 +630,9 @@ def test_question_add_two_answers():
 def test_question_correct_option():
     """Test add answer
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer("That's me.")
-    a2 = quest2pdf.Answer("That's you.")
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer("That's me.")
+    a2 = exam2pdf.Answer("That's you.")
     q.add_answer(a1), q.add_answer(a2)
 
     with pytest.raises(ValueError):
@@ -642,8 +642,8 @@ def test_question_correct_option():
 def test_question_shuffle_one_answer():
     """Test shuffle with one answer added
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer("That's me.")
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer("That's me.")
     q.add_answer(a1)
     random.seed(1)
     q.shuffle()
@@ -656,11 +656,11 @@ def test_question_shuffle_one_answer():
 def test_question_shuffle_more_answers():
     """Test shuffle with more answers added
     """
-    q = quest2pdf.Question("Who are you?")
-    a1 = quest2pdf.Answer("That's me.")
-    a2 = quest2pdf.Answer("That's not me.")
-    a3 = quest2pdf.Answer("That's him")
-    a4 = quest2pdf.Answer("That's her.")
+    q = exam2pdf.Question("Who are you?")
+    a1 = exam2pdf.Answer("That's me.")
+    a2 = exam2pdf.Answer("That's not me.")
+    a3 = exam2pdf.Answer("That's him")
+    a4 = exam2pdf.Answer("That's her.")
     q.add_answer(a1)
     q.add_answer(a2, True)
     q.add_answer(a3)
@@ -678,7 +678,7 @@ def test_question_load_two_answers():
     """load question and two answers.
     """
     tupl = ("t", "s", "i", 1, "a1", "ai1", "a", "ai2")
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     quest.load_sequentially(iter(tupl))
 
     assert quest.text == tupl[0]
@@ -698,7 +698,7 @@ def test_question_load_partial_answer():
     """load question and only answer text;
     answer image checked for default value.
     """
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     sequence = ("Text", "Subject", "dir/ec/tor/y", 1, "Answer")
     iterator = iter(sequence)
     quest.load_sequentially(iterator)
@@ -717,7 +717,7 @@ def test_question_load_empty_answer():
     """load question and only some empty answers;
     check empty answers are not loaded.
     """
-    quest = quest2pdf.Question()
+    quest = exam2pdf.Question()
     sequence = (
         "Text",
         "Subject",
@@ -748,7 +748,7 @@ def test_question_load_empty_answer():
 
 
 def test_truefalse_question_init_emtpy():
-    quest = quest2pdf.TrueFalseQuest()
+    quest = exam2pdf.TrueFalseQuest()
 
     assert quest.text == ""
     assert quest.subject == ""
@@ -760,7 +760,7 @@ def test_truefalse_question_init_full():
     """test init with no answer
     """
     text, subject, image, level = ("q text", "q subject", Path("image.png"), 2)
-    quest = quest2pdf.TrueFalseQuest(text, subject, image, level)
+    quest = exam2pdf.TrueFalseQuest(text, subject, image, level)
 
     assert quest.text == text
     assert quest.subject == subject
@@ -771,8 +771,8 @@ def test_truefalse_question_init_full():
 def test_truefalse_quest_add_one_answer():
     """test add an answer
     """
-    answer = quest2pdf.TrueFalseAnswer(True)
-    quest = quest2pdf.TrueFalseQuest()
+    answer = exam2pdf.TrueFalseAnswer(True)
+    quest = exam2pdf.TrueFalseQuest()
     quest.add_answer(answer)
 
     assert quest.answers == (answer,)
@@ -784,9 +784,9 @@ def test_truefalse_quest_add_one_answer():
 def test_truefalse_quest_add_two_answers():
     """test add 2 answers
     """
-    true_answer = quest2pdf.TrueFalseAnswer(True)
-    false_answer = quest2pdf.TrueFalseAnswer(False)
-    quest = quest2pdf.TrueFalseQuest()
+    true_answer = exam2pdf.TrueFalseAnswer(True)
+    false_answer = exam2pdf.TrueFalseAnswer(False)
+    quest = exam2pdf.TrueFalseQuest()
     quest.answers = (true_answer, false_answer)
 
     assert quest.answers == (true_answer, false_answer)
@@ -798,9 +798,9 @@ def test_truefalse_quest_add_two_answers():
 def test_truefalse_question_add_two_true():
     """test add true answers
     """
-    true_answer_1 = quest2pdf.TrueFalseAnswer(True)
-    true_answer_2 = quest2pdf.TrueFalseAnswer(True)
-    quest = quest2pdf.TrueFalseQuest()
+    true_answer_1 = exam2pdf.TrueFalseAnswer(True)
+    true_answer_2 = exam2pdf.TrueFalseAnswer(True)
+    quest = exam2pdf.TrueFalseQuest()
     quest.add_answer(true_answer_1)
 
     with pytest.raises(ValueError):
@@ -810,9 +810,9 @@ def test_truefalse_question_add_two_true():
 def test_truefalse_question_add_answers_correct_set():
     """test add 2 answer
     """
-    true_answer = quest2pdf.TrueFalseAnswer(True)
-    false_answer = quest2pdf.TrueFalseAnswer(False)
-    quest = quest2pdf.TrueFalseQuest()
+    true_answer = exam2pdf.TrueFalseAnswer(True)
+    false_answer = exam2pdf.TrueFalseAnswer(False)
+    quest = exam2pdf.TrueFalseQuest()
     quest.add_answer(true_answer)
     quest.add_answer(false_answer, is_correct=True)
 
@@ -822,10 +822,10 @@ def test_truefalse_question_add_answers_correct_set():
 def test_truefalse_question_add_three_answers():
     """test add 3 answer ... maybe redundant
     """
-    true_answer_1 = quest2pdf.TrueFalseAnswer(True)
-    false_answer = quest2pdf.TrueFalseAnswer(False)
-    true_answer_2 = quest2pdf.TrueFalseAnswer(True)
-    quest = quest2pdf.TrueFalseQuest()
+    true_answer_1 = exam2pdf.TrueFalseAnswer(True)
+    false_answer = exam2pdf.TrueFalseAnswer(False)
+    true_answer_2 = exam2pdf.TrueFalseAnswer(True)
+    quest = exam2pdf.TrueFalseQuest()
     quest.add_answer(true_answer_1)
 
     with pytest.raises(ValueError):
@@ -833,9 +833,9 @@ def test_truefalse_question_add_three_answers():
 
 
 def test_truefalse_question_correct_answer_set():
-    true_answer = quest2pdf.TrueFalseAnswer(True)
-    false_answer = quest2pdf.TrueFalseAnswer(False)
-    quest = quest2pdf.TrueFalseQuest("question")
+    true_answer = exam2pdf.TrueFalseAnswer(True)
+    false_answer = exam2pdf.TrueFalseAnswer(False)
+    quest = exam2pdf.TrueFalseQuest("question")
     quest._answers = (true_answer, false_answer)
 
     quest.correct_answer = false_answer
@@ -844,9 +844,9 @@ def test_truefalse_question_correct_answer_set():
 
 
 def test_truefalse_question_wrong_correct_answer_set():
-    true_answer = quest2pdf.TrueFalseAnswer(True)
-    false_answer = quest2pdf.TrueFalseAnswer(False)
-    quest = quest2pdf.TrueFalseQuest("question")
+    true_answer = exam2pdf.TrueFalseAnswer(True)
+    false_answer = exam2pdf.TrueFalseAnswer(False)
+    quest = exam2pdf.TrueFalseQuest("question")
     quest._answers = (true_answer,)
 
     with pytest.raises(ValueError):
@@ -856,7 +856,7 @@ def test_truefalse_question_wrong_correct_answer_set():
 def test_truefalse_question_shuffle_empty():
     """test shuffle without answer
     """
-    quest = quest2pdf.TrueFalseQuest()
+    quest = exam2pdf.TrueFalseQuest()
 
     quest.shuffle()
 
@@ -866,9 +866,9 @@ def test_truefalse_question_shuffle_empty():
 def test_truefalse_question_shuffle():
     """test shuffle for true false question
     """
-    false_answer = quest2pdf.TrueFalseAnswer(False)
-    true_answer = quest2pdf.TrueFalseAnswer(True)
-    quest = quest2pdf.TrueFalseQuest()
+    false_answer = exam2pdf.TrueFalseAnswer(False)
+    true_answer = exam2pdf.TrueFalseAnswer(True)
+    quest = exam2pdf.TrueFalseQuest()
     quest.add_answer(false_answer)
     quest.add_answer(true_answer)
 
@@ -883,7 +883,7 @@ def test_truefalse_question_load0():
     """load question and two answers.
     """
     tupl = ("t", "s", "i", 1, "1", "image", "", "")
-    quest = quest2pdf.TrueFalseQuest()
+    quest = exam2pdf.TrueFalseQuest()
     quest.load_sequentially(iter(tupl))
 
     assert quest.text == tupl[0]

@@ -2,9 +2,9 @@ import pytest
 from pathlib import Path
 import random
 
-import quest2pdf
-from quest2pdf.exam import SerializeExam
-from quest2pdf.utility import ItemLevel, set_i18n
+import exam2pdf
+from exam2pdf.exam import SerializeExam
+from exam2pdf.utility import ItemLevel, set_i18n
 
 _ = set_i18n()
 
@@ -13,7 +13,7 @@ def test_exam():
     """GIVEN an empty Exam
     THEN questions attribute is an empty tuple
     """
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
 
     assert ex.questions == tuple()
 
@@ -22,8 +22,8 @@ def test_exam_init(question1, question2):
     """GIVEN Exam initialized with one/two questions
     THEN questions attribute have the given questions
     """
-    ex1 = quest2pdf.Exam(question1)
-    ex2 = quest2pdf.Exam(question1, question2)
+    ex1 = exam2pdf.Exam(question1)
+    ex2 = exam2pdf.Exam(question1, question2)
 
     assert ex1.questions == (question1,)
     assert ex2.questions == (question1, question2)
@@ -34,7 +34,7 @@ def test_exam_questions_add(question1, question2):
     WHEN add_question two questions
     THEN added questions are in questions attribute
     """
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.add_question(question1)
     ex.add_question(question2)
 
@@ -48,7 +48,7 @@ def test_exam_questions_add_and_set(question1, question2):
     AND a tuple with one question is set
     THEN attribute assignment override the added questions
     """
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.add_question(question1)
     ex.questions = (question2,)
 
@@ -58,7 +58,7 @@ def test_exam_questions_add_and_set(question1, question2):
 
 def test_exam_attribute_selector1():
     """test attribute_selector default value"""
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
 
     assert ex.attribute_selector == ()
 
@@ -66,7 +66,7 @@ def test_exam_attribute_selector1():
 def test_exam_attribute_selector2():
     """test attribute_selector set and type conversion
     """
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     expected = ("hello", "2", "times")
     ex.attribute_selector = (expected[0], int(expected[1]), expected[2])
 
@@ -79,14 +79,14 @@ def test_exam_add_path_parent1(tmp_path):
     image = Path("images/image.png")
     file_path = tmp_path / "A.txt"
     file_path.touch()
-    q1 = quest2pdf.Question("q1 text", "")
+    q1 = exam2pdf.Question("q1 text", "")
     q1.answers = (
-        quest2pdf.Answer("a1 text", image),
-        quest2pdf.Answer("a2 text", image),
+        exam2pdf.Answer("a1 text", image),
+        exam2pdf.Answer("a2 text", image),
     )
-    q2 = quest2pdf.Question("q2 text", "", image)
-    q2.add_answer(quest2pdf.Answer("a3 text"))
-    ex = quest2pdf.Exam(q1, q2)
+    q2 = exam2pdf.Question("q2 text", "", image)
+    q2.add_answer(exam2pdf.Answer("a3 text"))
+    ex = exam2pdf.Exam(q1, q2)
     ex.add_path_parent(file_path)
 
     assert ex.questions[0].image == Path()
@@ -99,14 +99,14 @@ def test_exam_add_path_parent1(tmp_path):
 def test_exam_add_path_parent2(tmp_path):
     image = Path("images/image.png")
     folder_path = tmp_path
-    q1 = quest2pdf.Question("q1 text", "")
+    q1 = exam2pdf.Question("q1 text", "")
     q1.answers = (
-        quest2pdf.Answer("a1 text", image),
-        quest2pdf.Answer("a2 text", image),
+        exam2pdf.Answer("a1 text", image),
+        exam2pdf.Answer("a2 text", image),
     )
-    q2 = quest2pdf.Question("q2 text", "", image)
-    q2.add_answer(quest2pdf.Answer("a3 text"))
-    ex = quest2pdf.Exam(q1, q2)
+    q2 = exam2pdf.Question("q2 text", "", image)
+    q2.add_answer(exam2pdf.Answer("a3 text"))
+    ex = exam2pdf.Exam(q1, q2)
     ex.add_path_parent(folder_path)
 
     assert ex.questions[0].image == Path()
@@ -119,7 +119,7 @@ def test_exam_add_path_parent2(tmp_path):
 def test_exam_load0():
     """test empty iterable
     """
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.load(iter(()))
 
     assert ex.questions == tuple()
@@ -153,7 +153,7 @@ def test_exam_load1():
             ]
         ),
     )
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.load(data)
 
     for i in (0, 1):
@@ -179,7 +179,7 @@ def test_exam_load2():
     """test without setting _attribute_selector
     and missing row
     """
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     reader = (dict([]), dict([("A", "What?"), ("B", "topic")]))
     ex.load(reader)
 
@@ -206,7 +206,7 @@ def test_exam_load3():
             ]
         ),
     )
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.attribute_selector = (
         "text",
         "subject",
@@ -242,10 +242,10 @@ def test_exam_load4():
     """test setting _attribute_selector
     """
     data = (dict([("text", "T"), ("subject", "S"), ("XXX level", 2), ("void", "")]),)
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.attribute_selector = ("text", "subject", "void", "level")
 
-    with pytest.raises(quest2pdf.Quest2pdfException):
+    with pytest.raises(exam2pdf.Quest2pdfException):
         ex.load(data)
 
 
@@ -275,7 +275,7 @@ def test_shuffle():
         ),
     )
     correct_values = ("D", "A")
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.attribute_selector = (
         "question",
         "void",
@@ -330,7 +330,7 @@ def test_exam_print():
         ),
     )
     text, q_image, level, a_image = f"text: A1", f"image: .", f"level: 2", f"image: S"
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.attribute_selector = ("field A", "void", "void", "field G", "void", "field F")
     ex.load(data)
 
@@ -341,20 +341,20 @@ def test_exam_print():
 
 
 def test_exam_question():
-    question1 = quest2pdf.Question("mc quest1 text", "subject")
+    question1 = exam2pdf.Question("mc quest1 text", "subject")
     question1.answers = (
-        quest2pdf.Answer("Q1 A1"),
-        quest2pdf.Answer("Q1 A2"),
-        quest2pdf.Answer("Q1 A3"),
+        exam2pdf.Answer("Q1 A1"),
+        exam2pdf.Answer("Q1 A2"),
+        exam2pdf.Answer("Q1 A3"),
     )
-    question2 = quest2pdf.Question("mc quest2 text", "subject")
+    question2 = exam2pdf.Question("mc quest2 text", "subject")
     question2.answers = (
-        quest2pdf.Answer("Q2 A1"),
-        quest2pdf.Answer("Q2 A2"),
-        quest2pdf.Answer("Q2 A3"),
+        exam2pdf.Answer("Q2 A1"),
+        exam2pdf.Answer("Q2 A2"),
+        exam2pdf.Answer("Q2 A3"),
     )
 
-    ex = quest2pdf.Exam(question1, question2)
+    ex = exam2pdf.Exam(question1, question2)
 
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_answer.text == "Q1 A1"
@@ -362,18 +362,18 @@ def test_exam_question():
 
 
 def test_exam_truefalse_question():
-    question1 = quest2pdf.TrueFalseQuest("mc quest1 text", "subject")
+    question1 = exam2pdf.TrueFalseQuest("mc quest1 text", "subject")
     question1.answers = (
-        quest2pdf.TrueFalseAnswer(True),
-        quest2pdf.TrueFalseAnswer(False),
+        exam2pdf.TrueFalseAnswer(True),
+        exam2pdf.TrueFalseAnswer(False),
     )
-    question2 = quest2pdf.Question("mc quest2 text", "subject")
+    question2 = exam2pdf.Question("mc quest2 text", "subject")
     question2.answers = (
-        quest2pdf.TrueFalseAnswer(False),
-        quest2pdf.TrueFalseAnswer(True),
+        exam2pdf.TrueFalseAnswer(False),
+        exam2pdf.TrueFalseAnswer(True),
     )
 
-    ex = quest2pdf.Exam(question1, question2)
+    ex = exam2pdf.Exam(question1, question2)
 
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_answer.boolean is True
@@ -382,19 +382,19 @@ def test_exam_truefalse_question():
 
 
 def test_exam_mix_question():
-    question = quest2pdf.Question("mc quest1 text", "subject")
+    question = exam2pdf.Question("mc quest1 text", "subject")
     question.answers = (
-        quest2pdf.Answer("Q1 A1"),
-        quest2pdf.Answer("Q1 A2"),
-        quest2pdf.Answer("Q1 A3"),
+        exam2pdf.Answer("Q1 A1"),
+        exam2pdf.Answer("Q1 A2"),
+        exam2pdf.Answer("Q1 A3"),
     )
-    truefalse_quest = quest2pdf.TrueFalseQuest("mc quest2 text", "subject")
+    truefalse_quest = exam2pdf.TrueFalseQuest("mc quest2 text", "subject")
     truefalse_quest.answers = (
-        quest2pdf.TrueFalseAnswer(False),
-        quest2pdf.TrueFalseAnswer(True),
+        exam2pdf.TrueFalseAnswer(False),
+        exam2pdf.TrueFalseAnswer(True),
     )
 
-    ex = quest2pdf.Exam(question, truefalse_quest)
+    ex = exam2pdf.Exam(question, truefalse_quest)
 
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_option == "A"
@@ -403,13 +403,13 @@ def test_exam_mix_question():
 
 
 def test_from_csv0(empty_question_file):
-    ex = quest2pdf.Exam()
-    with pytest.raises(quest2pdf.Quest2pdfException):
+    ex = exam2pdf.Exam()
+    with pytest.raises(exam2pdf.Quest2pdfException):
         ex.from_csv(empty_question_file)
 
 
 def test_from_csv1(tmp_path, question_data_file):
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.from_csv(question_data_file)
 
     assert len(ex.questions) == 1
@@ -419,7 +419,7 @@ def test_from_csv1(tmp_path, question_data_file):
 
 
 def test_from_csv2(truefalse_question_file):
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.attribute_selector = ("question", "void", "void", "void", "A", "void", "B")
     ex.from_csv(truefalse_question_file)
 
@@ -452,7 +452,7 @@ def test_copy_exam_add_question(dummy_exam):
     ex = dummy_exam
     ex_questions_len = len(ex.questions)
     new_ex = ex.copy()
-    new_ex.add_question(quest2pdf.Question("new"))
+    new_ex.add_question(exam2pdf.Question("new"))
 
     assert len(ex.questions) == ex_questions_len
 
@@ -461,7 +461,7 @@ def test_copy_mix_exam_add_question(mix_dummy_exam):
     ex = mix_dummy_exam
     ex_questions_len = len(ex.questions)
     new_ex = ex.copy()
-    new_ex.add_question(quest2pdf.Question("new"))
+    new_ex.add_question(exam2pdf.Question("new"))
 
     assert len(ex.questions) == ex_questions_len
 
@@ -470,7 +470,7 @@ def test_copy_exam_add_answer(dummy_exam):
     ex = dummy_exam
     question_1_answers_len = len(ex.questions[0].answers)
     new_ex = ex.copy()
-    new_ex.questions[0].add_answer(quest2pdf.Answer("q1 a3"))
+    new_ex.questions[0].add_answer(exam2pdf.Answer("q1 a3"))
 
     assert len(ex.questions[0].answers) == question_1_answers_len
 
@@ -507,7 +507,7 @@ def test_copy_exam_shuffle_questions(dummy_exam):
 def test_print_exam(tmp_path):
     pdf_magic_no = b"PDF"
     file_path = tmp_path / "Exam"
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.print(file_path)
 
     try:
@@ -564,7 +564,7 @@ def test_print_correction0(tmp_path):
     pdf_magic_no = b"PDF"
     exam_file_path = tmp_path / "Exam"
     correction_file_path = tmp_path / "Correction"
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     ex.print(exam_file_path, correction_file_name=correction_file_path)
 
     try:
@@ -579,9 +579,9 @@ def test_print_correction1(tmp_path):
     pdf_magic_no = b"PDF"
     exam_file_path = tmp_path / "Exam"
     correction_file_path = tmp_path / "Correction"
-    q1 = quest2pdf.Question("q1 text", "")
-    q1.answers = (quest2pdf.Answer("a1 text"), quest2pdf.Answer("a2 text"))
-    ex = quest2pdf.Exam(q1)
+    q1 = exam2pdf.Question("q1 text", "")
+    q1.answers = (exam2pdf.Answer("a1 text"), exam2pdf.Answer("a2 text"))
+    ex = exam2pdf.Exam(q1)
     ex.print(exam_file_path, correction_file_name=correction_file_path)
 
     try:
@@ -603,7 +603,7 @@ def test_have_a_look(have_a_look, is_correct):
 
 
 def test_serialize_empty():
-    ex = quest2pdf.Exam()
+    ex = exam2pdf.Exam()
     serial = SerializeExam(ex)
 
     assert list(serial.assignment()) == []
