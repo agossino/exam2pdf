@@ -20,5 +20,5 @@ __all__ = [
     "Quest2pdfException",
 ]
 
-__version_info__ = (0, "0+aves")
+__version_info__ = (0, 1)
 __version__ = ".".join(map(str, __version_info__))
