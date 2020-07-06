@@ -402,13 +402,31 @@ def test_exam_mix_question():
     assert ex.questions[1].correct_answer.text == _("False")
 
 
-def test_from_csv0(empty_question_file):
+def test_from_csv_empty_file(empty_question_file):
+    """GIVEN an empty csv file
+    WHEN it tries to read
+    THEN exception is raised
+    """
     ex = exam2pdf.Exam()
     with pytest.raises(exam2pdf.Quest2pdfException):
         ex.from_csv(empty_question_file)
 
 
-def test_from_csv1(tmp_path, question_data_file):
+def test_from_csv_different_encodings(write_different_encoding):
+    """GIVEN csv files with different encodings
+    WHEN they are read
+    THEN it does not fail
+    """
+    ex = exam2pdf.Exam()
+    for file_path in write_different_encoding:
+        ex.from_csv(file_path)
+
+
+def test_from_csv_one_question(tmp_path, question_data_file):
+    """GIVEN a csv file with one multi choice
+    question and three answers with images
+    WHEN it is read
+    THEN a sample of correct information are found"""
     ex = exam2pdf.Exam()
     ex.from_csv(question_data_file)
 
@@ -418,7 +436,10 @@ def test_from_csv1(tmp_path, question_data_file):
     assert ex.questions[0].answers[2].image == tmp_path / "ci"
 
 
-def test_from_csv2(truefalse_question_file):
+def test_from_csv_one_truefalse_question(truefalse_question_file):
+    """GIVEN a csv file with one truefalse question
+    WHEN it is read
+    THEN it recognized as truefalse because False option is found"""
     ex = exam2pdf.Exam()
     ex.attribute_selector = ("question", "void", "void", "void", "A", "void", "B")
     ex.from_csv(truefalse_question_file)

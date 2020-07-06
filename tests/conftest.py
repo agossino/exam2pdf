@@ -229,6 +229,20 @@ def question_data_file(tmp_path):
 
 
 @pytest.fixture
+def write_different_encoding(tmp_path):
+    data = (b"A,B,C,D\nPerch\xe9 no?,\xc8 tutto un casino,L'altra citt\xe0.,\xe0\xe8\xe9\xec\xf2\xf9\n",
+                 b"A,B,C,D\nPerch? no?,? tutto un casino,L'altra citt?.,??????\n",
+                 b'A,B,C,D\nPerch\xc3\xa9 no?,\xc3\x88 tutto un casino,L\xe2\x80\x99altra citt\xc3\xa0.,\xc3\xa0\xc3\xa8\xc3\xa9\xc3\xac\xc3\xb2\xc3\xb9\n')
+    files_path = ((tmp_path / "iso15.csv"),
+                 (tmp_path / "utf-8.csv"),
+                 (tmp_path / "win1250.csv"))
+    for file_path, datum in zip(files_path, data):
+        file_path.write_bytes(datum)
+
+    return files_path
+
+
+@pytest.fixture
 def have_a_look(tmp_path, big_dummy_exam):
     image_folder = Path("tests/unit/resources")
     image_tmp_folder = tmp_path / image_folder.name
