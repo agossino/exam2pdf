@@ -5,8 +5,10 @@ from enum import Enum
 import gettext
 from pathlib import Path
 
+import chardet
 
-class Quest2pdfException(BaseException):
+
+class Exam2pdfException(BaseException):
     pass
 
 
@@ -51,3 +53,15 @@ def set_i18n():
     locales = this_script_path.parent / "locales"
     trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
     return trans.gettext
+
+
+def guess_encoding(file_path: Path) -> str:
+    """Try to guess file encoding
+    """
+    result = chardet.detect(file_path.read_bytes())
+    encoding = result["encoding"]
+
+    if encoding is None:
+        raise Exam2pdfException("No encoding found for file %s", file_path)
+
+    return encoding

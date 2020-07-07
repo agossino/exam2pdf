@@ -7,7 +7,7 @@ from .question import (
     TrueFalseQuest,
 )
 from .exam import Exam
-from .utility import Quest2pdfException
+from .utility import Exam2pdfException
 
 __all__ = [
     "Exam",
@@ -17,7 +17,7 @@ __all__ = [
     "Question",
     "Question",
     "TrueFalseQuest",
-    "Quest2pdfException",
+    "Exam2pdfException",
 ]
 
 __version_info__ = (0, 1)
