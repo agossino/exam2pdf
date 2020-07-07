@@ -2,4 +2,3 @@ test coverage
 answer.boolean in TrueFalseQuest is stressed by pycharm
 Questions in bolding characters
 Checker sheet: in question number 100, the number almost collide with the letter (correct option)
-Quest2pdfException to be changed in Exam2pdfException

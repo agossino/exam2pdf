@@ -202,7 +202,15 @@ def save_log_configuration(file_path):
 
 
 @pytest.fixture
-def empty_question_file(tmp_path):
+def empty_file(tmp_path):
+    file_path = tmp_path / "empty.csv"
+    text = ""
+    file_path.write_text(text)
+    return file_path
+
+
+@pytest.fixture
+def no_question_file(tmp_path):
     file_path = tmp_path / "question.csv"
     text = "question,subject,image,level,A,Ai,B,Bi,C,Ci\n "
     file_path.write_text(text)
@@ -229,17 +237,17 @@ def question_data_file(tmp_path):
 
 
 @pytest.fixture
-def write_different_encoding(tmp_path):
-    data = (b"A,B,C,D\nPerch\xe9 no?,\xc8 tutto un casino,L'altra citt\xe0.,\xe0\xe8\xe9\xec\xf2\xf9\n",
-                 b"A,B,C,D\nPerch? no?,? tutto un casino,L'altra citt?.,??????\n",
-                 b'A,B,C,D\nPerch\xc3\xa9 no?,\xc3\x88 tutto un casino,L\xe2\x80\x99altra citt\xc3\xa0.,\xc3\xa0\xc3\xa8\xc3\xa9\xc3\xac\xc3\xb2\xc3\xb9\n')
-    files_path = ((tmp_path / "iso15.csv"),
-                 (tmp_path / "utf-8.csv"),
-                 (tmp_path / "win1250.csv"))
-    for file_path, datum in zip(files_path, data):
-        file_path.write_bytes(datum)
+def files_with_different_encoding(tmp_path):
+    text = "A,B,C,D\ncittà,perché,è andato,così\ngiù,È andato,io@qui.it,100 €"
 
-    return files_path
+    files_encoding = ((tmp_path / "utf8.csv", "utf_8"),
+                      (tmp_path / "utf16.csv", "utf_16"),
+                      (tmp_path / "cp1252.csv", "cp1252"),
+                      (tmp_path / "iso8859_15.csv", "iso8859_15"))
+    for file, encoding in files_encoding:
+        file.write_text(text, encoding=encoding)
+
+    return tuple(item[0] for item in files_encoding)
 
 
 @pytest.fixture
