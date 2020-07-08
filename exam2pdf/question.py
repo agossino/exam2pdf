@@ -4,7 +4,7 @@ from pathlib import Path
 from random import shuffle
 from typing import Tuple, Iterator, Any, Optional, List, Iterable, Callable, Union
 
-from .utility import safe_int, Quest2pdfException, set_i18n
+from .utility import safe_int, Exam2pdfException, set_i18n
 
 
 CasterType = Callable[[Any], Any]
@@ -304,7 +304,7 @@ class Question:
                 try:
                     setattr(self, attribute, caster(next(iterator)))
                 except TypeError:
-                    raise Quest2pdfException("Invalid type in cvs file")
+                    raise Exam2pdfException("Invalid type in cvs file")
 
                 attribute = next(attribute_iterator, None)
                 caster = next(caster_iterator, None)

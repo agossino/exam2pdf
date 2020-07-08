@@ -6,7 +6,7 @@ import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
 
 from .question import Question, TrueFalseQuest
-from .utility import ItemLevel, Item, Quest2pdfException, set_i18n
+from .utility import ItemLevel, Item, Exam2pdfException, set_i18n, guess_encoding
 from .export import RLInterface
 
 
@@ -63,7 +63,7 @@ class Exam:
                 try:
                     data = [row[key] for key in self._attribute_selector]
                 except KeyError:
-                    raise Quest2pdfException("Key mismatch in cvs file")
+                    raise Exam2pdfException("Key mismatch in cvs file")
             else:
                 data = [row[key] for key in row]
             if data:
@@ -71,10 +71,12 @@ class Exam:
                 iterator = iter(data)
                 quest.load_sequentially(iterator)
 
-    def from_csv(self, file_path):
+    def from_csv(self, file_path: Path):
         """Read from csv file a series of questions.
         """
-        with file_path.open(encoding="utf-8") as csv_file:
+        encoding = guess_encoding(file_path)
+
+        with file_path.open(encoding=encoding) as csv_file:
             reader = csv.DictReader(csv_file, delimiter=",")
             rows: List[Dict[str, str]] = [row for row in reader]
 
