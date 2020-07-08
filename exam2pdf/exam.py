@@ -71,13 +71,13 @@ class Exam:
                 iterator = iter(data)
                 quest.load_sequentially(iterator)
 
-    def from_csv(self, file_path: Path):
+    def from_csv(self, file_path: Path, **kwargs: Any):
         """Read from csv file a series of questions.
         """
         encoding = guess_encoding(file_path)
 
         with file_path.open(encoding=encoding) as csv_file:
-            reader = csv.DictReader(csv_file, delimiter=",")
+            reader = csv.DictReader(csv_file, **kwargs)
             rows: List[Dict[str, str]] = [row for row in reader]
 
         self.load(rows)

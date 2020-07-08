@@ -251,6 +251,15 @@ def files_with_different_encoding(tmp_path):
 
 
 @pytest.fixture
+def weired_csv_file(tmp_path):
+    file_path = tmp_path / "question.csv"
+    text = "Q;S;I;1;a;ai;b;bi;c;ci"
+    file_path.write_text(text)
+
+    return file_path
+
+
+@pytest.fixture
 def have_a_look(tmp_path, big_dummy_exam):
     image_folder = Path("tests/unit/resources")
     image_tmp_folder = tmp_path / image_folder.name

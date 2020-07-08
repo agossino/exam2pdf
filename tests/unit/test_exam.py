@@ -451,6 +451,18 @@ def test_from_csv_one_truefalse_question(truefalse_question_file):
     assert ex.questions[0].correct_option == _("False")
 
 
+def test_from_csv_kwargs(weired_csv_file):
+    """GIVEN a csv file
+    WHEN a legitimate keyword argument for DictReader is used as from_csv
+    THEN keyword argument is correctly applied"""
+    fieldnames=("question", "subject", "image", "level", "A", "Ai" ,"B", "Bi", "C", "Ci")
+    ex = exam2pdf.Exam()
+    ex.from_csv(weired_csv_file, fieldnames=fieldnames, delimiter=";")
+
+    assert ex.questions[0].text == "Q"
+    assert ex.questions[0].level == 1
+
+
 def test_copy_exam(dummy_exam):
     """GIVEN an exam
     WHEN a copy is made
