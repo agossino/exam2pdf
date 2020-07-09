@@ -63,7 +63,9 @@ class Exam:
                 try:
                     data = [row[key] for key in self._attribute_selector]
                 except KeyError:
-                    raise Exam2pdfException("Key mismatch in cvs file")
+                    n_keys = len(row.keys())
+                    keys = " ".join(row.keys())
+                    raise Exam2pdfException(f"KeyError, {n_keys} keys found in cvs files: {keys}")
             else:
                 data = [row[key] for key in row]
             if data:
