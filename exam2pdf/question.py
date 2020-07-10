@@ -11,7 +11,7 @@ CasterType = Callable[[Any], Any]
 LETTER_A = "A"
 SPACE = " "
 
-_ = set_i18n()
+_ = set_i18n().gettext
 
 
 class Answer:

@@ -6,7 +6,7 @@ import exam2pdf
 from exam2pdf.exam import SerializeExam
 from exam2pdf.utility import ItemLevel, set_i18n
 
-_ = set_i18n()
+_ = set_i18n().gettext
 
 
 def test_exam():

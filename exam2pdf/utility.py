@@ -1,11 +1,18 @@
 import re
-from typing import List
+from typing import List, Tuple
 from collections import namedtuple
 from enum import Enum
 import gettext
 from pathlib import Path
 
 import chardet
+
+
+def set_i18n():
+    this_script_path = Path(__file__)
+    locales = this_script_path.parent / "locales"
+    trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
+    return trans
 
 
 class Exam2pdfException(BaseException):
@@ -48,13 +55,6 @@ def safe_int(text: str) -> int:
         return 0
 
 
-def set_i18n():
-    this_script_path = Path(__file__)
-    locales = this_script_path.parent / "locales"
-    trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
-    return trans.gettext
-
-
 def guess_encoding(file_path: Path) -> str:
     """Try to guess file encoding
     """
@@ -65,3 +65,4 @@ def guess_encoding(file_path: Path) -> str:
         raise Exam2pdfException("No encoding found for file %s", file_path)
 
     return encoding
+

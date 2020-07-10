@@ -10,7 +10,8 @@ from .utility import ItemLevel, Item, Exam2pdfException, set_i18n, guess_encodin
 from .export import RLInterface
 
 
-_ = set_i18n()
+_ = set_i18n().gettext
+ngettext = set_i18n().ngettext
 
 
 class Exam:
@@ -65,7 +66,10 @@ class Exam:
                 except KeyError:
                     n_keys = len(row.keys())
                     keys = " ".join(row.keys())
-                    raise Exam2pdfException(f"KeyError, {n_keys} keys found in cvs files: {keys}")
+                    message = ngettext("Unexpected heading in csv file. Found {0} key:",
+                                       "Unexpected heading in csv file. Found {0} keys:",
+                                       n_keys)
+                    raise Exam2pdfException(message.format(n_keys), keys)
             else:
                 data = [row[key] for key in row]
             if data:
