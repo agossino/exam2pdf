@@ -22,8 +22,8 @@ msgstr ""
 #, python-brace-format
 msgid "Unexpected heading in csv file. Found {0} key:"
 msgid_plural "Unexpected heading in csv file. Found {0} keys:"
-msgstr[0] "{0} chiave"
-msgstr[1] "{0} chiavi"
+msgstr[0] "Intestazione non prevista nel file csv. Trovata {0} chiave"
+msgstr[1] "Intestazione non prevista nel file csv. Trovate {0} chiavi"
 
 #: exam2pdf/exam.py:179
 msgid "checker"
@@ -31,8 +31,8 @@ msgstr "correttore"
 
 #: exam2pdf/question.py:94 exam2pdf/question.py:106
 msgid "True"
-msgstr "V"
+msgstr "Vero"
 
 #: exam2pdf/question.py:94 exam2pdf/question.py:106
 msgid "False"
-msgstr "F"
+msgstr "Falso"
