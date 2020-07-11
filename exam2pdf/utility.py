@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple
+from typing import List
 from collections import namedtuple
 from enum import Enum
 import gettext
@@ -65,4 +65,3 @@ def guess_encoding(file_path: Path) -> str:
         raise Exam2pdfException("No encoding found for file %s", file_path)
 
     return encoding
-

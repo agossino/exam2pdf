@@ -64,12 +64,29 @@ class Exam:
                 try:
                     data = [row[key] for key in self._attribute_selector]
                 except KeyError:
-                    n_keys = len(row.keys())
-                    keys = " ".join(row.keys())
-                    message = ngettext("Unexpected heading in csv file. Found {0} key:",
-                                       "Unexpected heading in csv file. Found {0} keys:",
-                                       n_keys)
-                    raise Exam2pdfException(message.format(n_keys), keys)
+                    n_expected_keys = len(self._attribute_selector)
+                    if None in row.keys():
+                        raise Exam2pdfException(_("Unpaired separator in cvs file."))
+                    else:
+                        n_found_keys = len(row.keys())
+                    expected_keys = "<" + "> <".join(self._attribute_selector) + ">"
+                    found_keys = "<" + "> <".join(row.keys()) + ">"
+                    message1 = ngettext(
+                        "Expected heading field in csv file is ",
+                        "Expected heading fields in csv file are ",
+                        n_expected_keys,
+                    )
+                    message2 = ngettext(
+                        ". Heading field Found instead is ",
+                        ". Heading fields found, instead, are ",
+                        n_found_keys,
+                    )
+                    raise Exam2pdfException(
+                        message1.format(n_expected_keys)
+                        + expected_keys
+                        + message2.format(n_found_keys)
+                        + found_keys
+                    )
             else:
                 data = [row[key] for key in row]
             if data:
