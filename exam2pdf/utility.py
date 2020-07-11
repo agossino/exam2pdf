@@ -15,7 +15,7 @@ def set_i18n():
     return trans
 
 
-class Exam2pdfException(BaseException):
+class Exam2pdfException(Exception):
     pass
 
 
