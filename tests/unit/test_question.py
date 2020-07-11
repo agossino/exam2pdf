@@ -5,7 +5,7 @@ import random
 import exam2pdf
 from exam2pdf.utility import safe_int, set_i18n
 
-_ = set_i18n()
+_ = set_i18n().gettext
 
 
 def test_answer_load_empty():

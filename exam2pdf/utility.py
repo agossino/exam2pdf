@@ -8,6 +8,13 @@ from pathlib import Path
 import chardet
 
 
+def set_i18n():
+    this_script_path = Path(__file__)
+    locales = this_script_path.parent / "locales"
+    trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
+    return trans
+
+
 class Exam2pdfException(BaseException):
     pass
 
@@ -46,13 +53,6 @@ def safe_int(text: str) -> int:
         return int(text)
     except ValueError:
         return 0
-
-
-def set_i18n():
-    this_script_path = Path(__file__)
-    locales = this_script_path.parent / "locales"
-    trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
-    return trans.gettext
 
 
 def guess_encoding(file_path: Path) -> str:

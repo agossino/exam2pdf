@@ -6,7 +6,7 @@ import exam2pdf
 from exam2pdf.exam import SerializeExam
 from exam2pdf.utility import ItemLevel, set_i18n
 
-_ = set_i18n()
+_ = set_i18n().gettext
 
 
 def test_exam():
@@ -455,7 +455,18 @@ def test_from_csv_kwargs(weired_csv_file):
     """GIVEN a csv file
     WHEN a legitimate keyword argument for DictReader is used as from_csv
     THEN keyword argument is correctly applied"""
-    fieldnames=("question", "subject", "image", "level", "A", "Ai" ,"B", "Bi", "C", "Ci")
+    fieldnames = (
+        "question",
+        "subject",
+        "image",
+        "level",
+        "A",
+        "Ai",
+        "B",
+        "Bi",
+        "C",
+        "Ci",
+    )
     ex = exam2pdf.Exam()
     ex.from_csv(weired_csv_file, fieldnames=fieldnames, delimiter=";")
 
