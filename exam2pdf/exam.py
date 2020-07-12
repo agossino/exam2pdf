@@ -121,6 +121,7 @@ class Exam:
         n_copies: int = 1,
         heading: str = "",
         footer: str = "",
+        **kwargs,
     ) -> None:
         """Print in PDF all the questions and correction
         """
@@ -148,6 +149,7 @@ class Exam:
                 destination=destination,
                 heading=f"{heading} {number}/{n_copies}",
                 footer=footer,
+                **kwargs,
             )
             interface.build()
 

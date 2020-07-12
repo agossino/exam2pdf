@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Dict, Any
 from .rlwrapper import PDFDoc
 from .utility import ItemLevel, Item
 
@@ -10,16 +10,10 @@ class RLInterface:
         """
         file_name: Path = kwargs.get("destination", Path(".")) / output_file
         self._input = input_generator
-        sub_item_bullet_type: str = kwargs.get("sub_item_bullet_type", "A")
-        top_item_bullet_type: str = kwargs.get("top_item_bullet_type", "1")
         page_heading: str = kwargs.get("heading", "")
         page_footer: str = kwargs.get("footer", "")
         self._doc = PDFDoc(
-            file_name,
-            top_item_bullet_type=top_item_bullet_type,
-            sub_item_bullet_type=sub_item_bullet_type,
-            page_heading=page_heading,
-            page_footer=page_footer,
+            file_name, page_heading=page_heading, page_footer=page_footer, **kwargs
         )
 
     def build(self) -> None:

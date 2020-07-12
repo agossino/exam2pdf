@@ -1,6 +1,6 @@
 from pathlib import Path
 import logging
-from typing import List, Union
+from typing import List, Union, Any
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -67,9 +67,15 @@ class PDFDoc:
         self._1st_page_header_text = kwargs.get("page_heading", "header text")
         self._later_pages_header_text = kwargs.get("page_heading", " ")
         self._footer_text = kwargs.get("page_footer", " ")
-        self._author = "Giancarlo"
-        self._title = "esame"
-        self._subject = "Corso"
+        self._author = kwargs.get("author", "")
+        self._title = kwargs.get("title", "")
+        self._subject = kwargs.get("subject", "")
+        self._top_item_style = kwargs.get(
+            "top_item_style", {"leftIndent": 5, "fontName": "Helvetica-Bold"}
+        )
+        self._sub_item_style = kwargs.get(
+            "sub_item_style", {"leftIndent": 5, "fontName": "Helvetica"}
+        )
 
     @property
     def separator(self):
@@ -98,21 +104,21 @@ class PDFDoc:
         then create a new _in_progress_item with a top item container."""
         if len(self._in_progress_item) != 0:
             self._build_in_progress_item()
-        self._in_progress_item = [self._build_item(item)]
+        self._in_progress_item = [self._build_item(item, **self._top_item_style)]
 
     def add_sub_item(self, item):
         """Add a sub item container to _in_progress_item.
         """
-        item_list = self._build_item(item)
+        item_list = self._build_item(item, **self._sub_item_style)
         value = 1 if len(self._in_progress_item) == 1 else None
         self._in_progress_item.append(
             ListItem(item_list, bulletType=self._sub_item_bullet_type, value=value)
         )
 
-    def _build_item(self, item) -> ListFlowable:
+    def _build_item(self, item, **style_options: Any) -> ListFlowable:
         """Build an item container.
         """
-        style = Style(spaceAfter=self._space_text_image)
+        style = Style(spaceAfter=self._space_text_image, **style_options)
         space = Spacer(1, self._space_after_item)
         if item.image != Path("."):
             image = get_std_aspect_image(item.image, width=80)

@@ -608,7 +608,22 @@ def test_print_two_exams(tmp_path, dummy_exam_with_img):
         assert data.find(pdf_magic_no) == 1
 
 
-def test_print_correction0(tmp_path):
+def test_print_top_item_style(tmp_path, dummy_exam_with_img):
+    pdf_magic_no = b"PDF"
+    file_path = tmp_path / "Exam.pdf"
+    ex = dummy_exam_with_img
+    top_item_style = {"top_item_style": {"fontName": "Helvetica", "fontSize": 14}}
+    ex.print(file_path, **top_item_style)
+
+    try:
+        data = file_path.read_bytes()
+    except FileNotFoundError:
+        assert False, "File not found"
+
+    assert data.find(pdf_magic_no) == 1
+
+
+def test_print_correction_no_questions(tmp_path):
     pdf_magic_no = b"PDF"
     exam_file_path = tmp_path / "Exam"
     correction_file_path = tmp_path / "Correction"
@@ -623,7 +638,7 @@ def test_print_correction0(tmp_path):
     assert correction_data.find(pdf_magic_no) == 1
 
 
-def test_print_correction1(tmp_path):
+def test_print_correction(tmp_path):
     pdf_magic_no = b"PDF"
     exam_file_path = tmp_path / "Exam"
     correction_file_path = tmp_path / "Correction"
