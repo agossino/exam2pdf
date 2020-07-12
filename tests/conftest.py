@@ -275,7 +275,11 @@ def have_a_look(tmp_path, big_dummy_exam):
     correction_file_path = tmp_path / "Correction"
     ex = big_dummy_exam
     ex.add_path_parent(image_tmp_folder)
-    ex.print(exam_file_path, correction_file_name=correction_file_path, heading="Not shuffled exam")
+    ex.print(exam_file_path,
+             correction_file_name=correction_file_path,
+             heading="Not shuffled exam",
+             top_item_style={"fontName": "Times-Italic", "fontSize": 16},
+             sub_item_style={"fontName": "Courier", "fontSize": 14})
 
     subprocess.Popen(["evince", str(exam_file_path)])
     subprocess.Popen(["evince", str(correction_file_path)])
