@@ -1,5 +1,3 @@
-import re
-from typing import List
 from collections import namedtuple
 from enum import Enum
 import gettext
@@ -13,6 +11,9 @@ def set_i18n():
     locales = this_script_path.parent / "locales"
     trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
     return trans
+
+
+_ = set_i18n().gettext
 
 
 class Exam2pdfException(Exception):
@@ -38,14 +39,6 @@ class ItemLevel(Enum):
 
 
 Item = namedtuple("Item", ["item_level", "text", "image"])
-
-
-def exception_printer(exception_instance: Exception) -> str:
-    """Format an exception class and instance in string
-    """
-    pattern: str = r"\W+"
-    exc_list: List[str] = re.split(pattern, str(exception_instance.__class__))
-    return exc_list[2] + ": " + str(exception_instance)
 
 
 def safe_int(text: str) -> int:
