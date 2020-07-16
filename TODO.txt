@@ -1,4 +1,7 @@
 test coverage
 answer.boolean in TrueFalseQuest is stressed by pycharm
-test for missing question image and answer question image (too many dummy exam)
 test for permission denied in writing
+in Exception for heading fields, double entries should be removed
+DictReader delimiter in configuration file, does not accept 2 characters value, such as "\t"
+image size should be configurable
+
