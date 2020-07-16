@@ -1,4 +1,4 @@
 test coverage
 answer.boolean in TrueFalseQuest is stressed by pycharm
-Questions in bolding characters
-Checker sheet: in question number 100, the number almost collide with the letter (correct option)
+test for missing question image and answer question image (too many dummy exam)
+test for permission denied in writing

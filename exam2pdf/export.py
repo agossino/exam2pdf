@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator, Dict, Any
+from typing import Iterator
 from .rlwrapper import PDFDoc
 from .utility import ItemLevel, Item
 

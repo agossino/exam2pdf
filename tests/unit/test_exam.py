@@ -4,7 +4,7 @@ import random
 
 import exam2pdf
 from exam2pdf.exam import SerializeExam
-from exam2pdf.utility import ItemLevel, set_i18n
+from exam2pdf.utility import ItemLevel, set_i18n, Exam2pdfException
 
 _ = set_i18n().gettext
 
@@ -583,7 +583,7 @@ def test_print_one_exam(tmp_path, dummy_exam_with_img):
 def test_print_one_exam_with_wrong_img(tmp_path, dummy_exam):
     file_path = tmp_path / "Exam.pdf"
     ex = dummy_exam
-    with pytest.raises(OSError):
+    with pytest.raises(Exam2pdfException):
         ex.print(file_path)
 
 

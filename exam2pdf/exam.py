@@ -132,6 +132,8 @@ class Exam:
             to_be_shown=("subject", "text"),
         )
 
+        self._check_io()
+
         heading = exam_file_name.name if heading == "" else heading
 
         for number in range(1, n_copies + 1):
@@ -151,7 +153,11 @@ class Exam:
                 footer=footer,
                 **kwargs,
             )
-            interface.build()
+            try:
+                interface.build()
+            except:
+                message = _("Error in building ReportLab interface")
+                raise Exam2pdfException(message)
 
         if correction_file_name is not None:
             interface = RLInterface(
@@ -163,7 +169,11 @@ class Exam:
                 top_item_bullet_type="A",
                 sub_item_bullet_type="1",
             )
-            interface.build()
+            try:
+                interface.build()
+            except:
+                message = _("Error in building ReportLab interface")
+                raise Exam2pdfException(message)
 
     def answers_shuffle(self):
         for question in self.questions:
@@ -171,6 +181,16 @@ class Exam:
 
     def questions_shuffle(self):
         random.shuffle(self._questions)
+
+    def _check_io(self) -> None:
+        for question in self._questions:
+            image: Path = question.image
+            if image != Path() and not image.is_file():
+                raise Exam2pdfException(str(image) + _(" does not exists"))
+            for answer in question.answers:
+                image = answer.image
+                if image != Path() and not image.is_file():
+                    raise Exam2pdfException(str(image) + _(" does not exists"))
 
     def __str__(self) -> str:
         output: List[str] = []
