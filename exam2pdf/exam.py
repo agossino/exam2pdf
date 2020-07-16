@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
 import csv
+from pathlib import Path
 import random
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
 
+from .export import RLInterface
 from .question import Question, TrueFalseQuest
 from .utility import ItemLevel, Item, Exam2pdfException, set_i18n, guess_encoding
-from .export import RLInterface
 
 
 _ = set_i18n().gettext

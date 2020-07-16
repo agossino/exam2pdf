@@ -4,9 +4,7 @@ import random
 
 import exam2pdf
 from exam2pdf.exam import SerializeExam
-from exam2pdf.utility import ItemLevel, set_i18n, Exam2pdfException
-
-_ = set_i18n().gettext
+from exam2pdf.utility import ItemLevel, Exam2pdfException
 
 
 def test_exam():
@@ -372,7 +370,7 @@ def test_exam_truefalse_question():
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_answer.boolean is True
     assert ex.questions[1].text == "mc quest2 text"
-    assert ex.questions[1].correct_answer.text == _("False")
+    assert ex.questions[1].correct_answer.text == "False"
 
 
 def test_exam_mix_question():
@@ -393,7 +391,7 @@ def test_exam_mix_question():
     assert ex.questions[0].answers[1].image == Path()
     assert ex.questions[0].correct_option == "A"
     assert ex.questions[1].text == "mc quest2 text"
-    assert ex.questions[1].correct_answer.text == _("False")
+    assert ex.questions[1].correct_answer.text == "False"
 
 
 def test_from_csv_empty_file(empty_file):
@@ -448,7 +446,7 @@ def test_from_csv_one_truefalse_question(truefalse_question_file):
     ex.attribute_selector = ("question", "void", "void", "void", "A", "void", "B")
     ex.from_csv(truefalse_question_file)
 
-    assert ex.questions[0].correct_option == _("False")
+    assert ex.questions[0].correct_option == "False"
 
 
 def test_from_csv_kwargs(weired_csv_file):
@@ -580,9 +578,24 @@ def test_print_one_exam(tmp_path, dummy_exam_with_img):
     assert data.find(pdf_magic_no) == 1
 
 
-def test_print_one_exam_with_wrong_img(tmp_path, dummy_exam):
+def test_print_one_exam_without_img_questions(
+    tmp_path, dummy_exam_questions_without_img
+):
+    """GIVEN an Exam which questions images are not found
+    THEN Exception is risen
+    """
     file_path = tmp_path / "Exam.pdf"
-    ex = dummy_exam
+    ex = dummy_exam_questions_without_img
+    with pytest.raises(Exam2pdfException):
+        ex.print(file_path)
+
+
+def test_print_one_exam_without_img_answers(tmp_path, dummy_exam_answers_without_img):
+    """GIVEN an Exam which answers images are not found
+    THEN Exception is risen
+    """
+    file_path = tmp_path / "Exam.pdf"
+    ex = dummy_exam_answers_without_img
     with pytest.raises(Exam2pdfException):
         ex.print(file_path)
 
@@ -693,10 +706,15 @@ def test_serialize_assignment(dummy_exam):
         assert item.text == expected_sequence.pop()
 
 
-def test_serialize_assignment_shuffle_sub(big_dummy_exam):
-    ex = big_dummy_exam
+def test_serialize_assignment_shuffle_sub(mix_dummy_exam):
+    """GIVEN an Exam with mixed questions
+    WHEN exam is serialized with answers shuffled (sub item), but questions not
+    THEN answers are found shuffled and questions in original sequence"""
+    ex = mix_dummy_exam
     serial = SerializeExam(ex, shuffle_sub=True)
     random.seed(0)
+    expected_top_sequence = ["1", "2", "3", "4", "5", "6"]
+    expected_top_sequence.reverse()
     expected_sub_sequence = [
         "1",
         "3",
@@ -704,10 +722,10 @@ def test_serialize_assignment_shuffle_sub(big_dummy_exam):
         "3",
         "2",
         "1",
-        _("True"),
-        _("False"),
-        _("True"),
-        _("False"),
+        "True",
+        "False",
+        "True",
+        "False",
         "1",
         "3",
         "2",
@@ -716,20 +734,44 @@ def test_serialize_assignment_shuffle_sub(big_dummy_exam):
     expected_sub_sequence.reverse()
 
     for item in serial.assignment():
+        if item.item_level == ItemLevel.top:
+            assert expected_top_sequence.pop() in item.text
         if item.item_level == ItemLevel.sub:
             assert expected_sub_sequence.pop() in item.text
 
 
-def test_serialize_assignment_shuffle_top(dummy_exam):
-    ex = dummy_exam
+def test_serialize_assignment_shuffle_top(mix_dummy_exam):
+    """GIVEN an Exam with mixed questions
+    WHEN exam is serialized with questions shuffled (top item), but answers not
+    THEN questions are found shuffled and answers, in the shuffled questions, in original sequence"""
+    ex = mix_dummy_exam
     serial = SerializeExam(ex, shuffle_item=True)
     random.seed(0)
-    expected_top_sequence = ["3", "2", "1", "5", "4"]
+    expected_top_sequence = ["5", "3", "2", "1", "6", "4"]
     expected_top_sequence.reverse()
+    expected_sub_sequence = [
+        "False",
+        "True",
+        "True",
+        "False",
+        "1",
+        "2",
+        "3",
+        "1",
+        "2",
+        "3",
+        "1",
+        "2",
+        "3",
+        "4",
+    ]
+    expected_sub_sequence.reverse()
 
     for item in serial.assignment():
         if item.item_level == ItemLevel.top:
             assert expected_top_sequence.pop() in item.text
+        if item.item_level == ItemLevel.sub:
+            assert expected_sub_sequence.pop() in item.text
 
 
 def test_serialize_assignment_shuffle_top_n_copies(dummy_exam):
@@ -771,7 +813,7 @@ def test_serialize_correction_one_copy(dummy_exam):
 
     item = next(correction)
     assert item.item_level == ItemLevel.top
-    assert _("checker") in item.text
+    assert "checker" in item.text
     assert "1/1" in item.text
 
 

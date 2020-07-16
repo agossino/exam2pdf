@@ -1,11 +1,10 @@
-import pytest
 from pathlib import Path
 import random
 
-import exam2pdf
-from exam2pdf.utility import safe_int, set_i18n
+import pytest
 
-_ = set_i18n().gettext
+import exam2pdf
+from exam2pdf.utility import safe_int
 
 
 def test_answer_load_empty():
@@ -157,18 +156,18 @@ def test_answer_print():
     assert f"image: {image}" in a.__str__()
 
 
-def test_truefalse_answer_empty(set_i18n):
+def test_truefalse_answer_empty():
     a = exam2pdf.TrueFalseAnswer()
 
     assert a.boolean is False
-    assert a.text == _("False")
+    assert a.text == "False"
 
 
 def test_truefalse_answer_init_two_args():
     a = exam2pdf.TrueFalseAnswer(True, Path())
 
     assert a.boolean is True
-    assert a.text == _("True")
+    assert a.text == "True"
     assert a.image == Path()
 
 
@@ -177,21 +176,21 @@ def test_truefalse_answer_init_one_arg():
     a.boolean = False
 
     assert a.boolean is False
-    assert a.text == _("False")
+    assert a.text == "False"
 
 
 def test_truefalse_answer_init_num_arg():
     a = exam2pdf.TrueFalseAnswer(1)
 
     assert a.boolean is True
-    assert a.text == _("True")
+    assert a.text == "True"
 
 
 def test_truefalse_answer_init_num_arg0():
     a = exam2pdf.TrueFalseAnswer(0)
 
     assert a.boolean is False
-    assert a.text == _("False")
+    assert a.text == "False"
 
 
 def test_truefalse_answer_attribute():
@@ -778,7 +777,7 @@ def test_truefalse_quest_add_one_answer():
     assert quest.answers == (answer,)
     assert quest.correct_answer == answer
     assert quest.correct_index == 0
-    assert quest.correct_option == _(repr(answer.boolean))
+    assert quest.correct_option == repr(answer.boolean)
 
 
 def test_truefalse_quest_add_two_answers():
@@ -792,7 +791,7 @@ def test_truefalse_quest_add_two_answers():
     assert quest.answers == (true_answer, false_answer)
     assert quest.correct_answer == true_answer
     assert quest.correct_index == 0
-    assert quest.correct_option == _(repr(true_answer.boolean))
+    assert quest.correct_option == repr(true_answer.boolean)
 
 
 def test_truefalse_question_add_two_true():
