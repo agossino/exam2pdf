@@ -51,10 +51,16 @@ def safe_int(text: str) -> int:
 def guess_encoding(file_path: Path) -> str:
     """Try to guess file encoding
     """
-    result = chardet.detect(file_path.read_bytes())
+    try:
+        result = chardet.detect(file_path.read_bytes())
+    except FileNotFoundError:
+        message = _("csv file not found: ") + str(file_path)
+        raise Exam2pdfException(message)
+
     encoding = result["encoding"]
 
     if encoding is None:
-        raise Exam2pdfException("No encoding found for file %s", file_path)
+        message = _("no encoding found for file ") + str(file_path)
+        raise Exam2pdfException(message)
 
     return encoding
