@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 import random
+from tempfile import TemporaryFile
 from typing import Tuple, List, Iterable, Any, Mapping, Generator, Dict, Optional
 
 from .export import RLInterface
@@ -132,7 +133,7 @@ class Exam:
             to_be_shown=("subject", "text"),
         )
 
-        self._check_io()
+        self._check_io(destination)
 
         heading = exam_file_name.name if heading == "" else heading
 
@@ -182,15 +183,24 @@ class Exam:
     def questions_shuffle(self):
         random.shuffle(self._questions)
 
-    def _check_io(self) -> None:
+    def _check_io(self, destination: Path) -> None:
+        try:
+            with TemporaryFile(dir=str(destination)) as fp:
+                fp.write(b"")
+        except PermissionError:
+            message = _("you do not have write permission in ") + str(destination)
+            raise Exam2pdfException(message)
+
         for question in self._questions:
             image: Path = question.image
             if image != Path() and not image.is_file():
-                raise Exam2pdfException(str(image) + _(" does not exists"))
+                message = _("image file not found: ") + str(image)
+                raise Exam2pdfException(message)
             for answer in question.answers:
                 image = answer.image
                 if image != Path() and not image.is_file():
-                    raise Exam2pdfException(str(image) + _(" does not exists"))
+                    message = _("image file not found: ") + str(image)
+                    raise Exam2pdfException(message)
 
     def __str__(self) -> str:
         output: List[str] = []

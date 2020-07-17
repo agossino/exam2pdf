@@ -74,6 +74,13 @@ def dummy_exam_answers_without_img(tmp_path, tmp_folders, dummy_exam):
 
 
 @pytest.fixture
+def no_write_permission_dir(tmp_path):
+    no_write_dir = tmp_path / "no_write_dir"
+    no_write_dir.mkdir(mode=0o111)
+    return no_write_dir
+
+
+@pytest.fixture
 def dummy_exam_with_img(dummy_exam, dummy_exam_questions_without_img, dummy_exam_answers_without_img):
     return dummy_exam
 

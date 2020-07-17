@@ -578,7 +578,7 @@ def test_print_one_exam(tmp_path, dummy_exam_with_img):
     assert data.find(pdf_magic_no) == 1
 
 
-def test_print_one_exam_without_img_questions(
+def test_print_exam_without_img_questions(
     tmp_path, dummy_exam_questions_without_img
 ):
     """GIVEN an Exam which questions images are not found
@@ -590,7 +590,7 @@ def test_print_one_exam_without_img_questions(
         ex.print(file_path)
 
 
-def test_print_one_exam_without_img_answers(tmp_path, dummy_exam_answers_without_img):
+def test_print_exam_without_img_answers(tmp_path, dummy_exam_answers_without_img):
     """GIVEN an Exam which answers images are not found
     THEN Exception is risen
     """
@@ -598,6 +598,17 @@ def test_print_one_exam_without_img_answers(tmp_path, dummy_exam_answers_without
     ex = dummy_exam_answers_without_img
     with pytest.raises(Exam2pdfException):
         ex.print(file_path)
+
+
+def test_print_without_permission(tmp_path, no_write_permission_dir):
+    """GIVEN an Exam
+    WHEN user has no permission to write in the directory
+    THEN Exception is risen
+    """
+    file_path = Path("exam.pdf")
+    ex = exam2pdf.Exam()
+    with pytest.raises(Exam2pdfException):
+        ex.print(file_path, destination=no_write_permission_dir)
 
 
 def test_print_two_exams(tmp_path, dummy_exam_with_img):

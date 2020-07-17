@@ -1,6 +1,5 @@
 test coverage
 answer.boolean in TrueFalseQuest is stressed by pycharm
-test for permission denied in writing
 in Exception for heading fields, double entries should be removed
 DictReader delimiter in configuration file, does not accept 2 characters value, such as "\t"
 image size should be configurable
