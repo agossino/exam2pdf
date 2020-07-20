@@ -7,9 +7,9 @@ import chardet
 
 
 def set_i18n():
-    this_script_path = Path(__file__)
-    locales = this_script_path.parent / "locales"
-    trans = gettext.translation("exam2pdf", localedir=str(locales), fallback=True)
+    # user application must use
+    # gettext.bindtextdomain("exam2pdf", localedir=application_locales)
+    trans = gettext.translation("exam2pdf", fallback=True)
     return trans
 
 
@@ -49,7 +49,17 @@ def safe_int(text: str) -> int:
 
 
 def guess_encoding(file_path: Path) -> str:
-    """Try to guess file encoding
+    """Try to guess file encoding.
+
+    Args:
+        file_path: file you want to guess the encoding.
+
+    Returns:
+        The file encoding.
+
+    Raises:
+        Exam2pdfException: if the given file is not found
+        and if chardet.detect["encoding"] is None.
     """
     try:
         result = chardet.detect(file_path.read_bytes())

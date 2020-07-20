@@ -1,31 +1,52 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# exam2pdf library.
+# Copyright (C) 2020 Giancarlo Ossino
+# This file is distributed under the same license as the exam2pdf package.
+# Giancarlo Ossino <gcossino at gmail.com>, 2020.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: exam2pdf 0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-10 19:10+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2020-07-18 20:10+0200\n"
+"PO-Revision-Date: 2020-07-18 20:30+0200\n"
+"Last-Translator: Author\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: exam2pdf/exam.py:69
-#, python-brace-format
-msgid "Unexpected heading in csv file. Found {0} key:"
-msgid_plural "Unexpected heading in csv file. Found {0} keys:"
-msgstr[0] "Intestazione non prevista nel file csv. Trovata {0} chiave"
-msgstr[1] "Intestazione non prevista nel file csv. Trovate {0} chiavi"
+#: exam2pdf/exam.py:70
+msgid "Unpaired separator in cvs file."
+msgstr "I separatori del file CSV sono spaiati."
 
-#: exam2pdf/exam.py:179
+#: exam2pdf/exam.py:76
+msgid "Expected heading field in csv file is "
+msgid_plural "Expected heading fields in csv file are "
+msgstr[0] "Il campo di intestazione del file CSV è "
+msgstr[1] "I campi di intestazione del file CSV sono "
+
+#: exam2pdf/exam.py:81
+msgid ". Heading field Found instead is "
+msgid_plural ". Heading fields found, instead, are "
+msgstr[0] ". Invece è stato trovato il campo di intestazione "
+msgstr[1] ". Invece sono stati trovati i campi di intestazione "
+
+#: exam2pdf/exam.py:160 exam2pdf/exam.py:176
+msgid "Error in building ReportLab interface"
+msgstr "Un errore è stato generato metre veniva costruito l'interfaccia PDF con ReportLab"
+
+#: exam2pdf/exam.py:191
+msgid "you do not have write permission in "
+msgstr "non hai i permessi di scrittura in "
+
+#: exam2pdf/exam.py:197 exam2pdf/exam.py:202
+msgid "image file not found: "
+msgstr "immagine non trovata: "
+
+#: exam2pdf/exam.py:228
 msgid "checker"
 msgstr "correttore"
 
@@ -35,4 +56,12 @@ msgstr "Vero"
 
 #: exam2pdf/question.py:94 exam2pdf/question.py:106
 msgid "False"
-msgstr "Falso"
+msgstr "False"
+
+#: exam2pdf/utility.py:67
+msgid "csv file not found: "
+msgstr "file CSV non trovato"
+
+#: exam2pdf/utility.py:73
+msgid "no encoding found for file "
+msgstr "nessuna codifica è stata trovata per il file "
