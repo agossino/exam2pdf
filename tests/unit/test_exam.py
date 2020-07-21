@@ -578,9 +578,7 @@ def test_print_one_exam(tmp_path, dummy_exam_with_img):
     assert data.find(pdf_magic_no) == 1
 
 
-def test_print_exam_without_img_questions(
-    tmp_path, dummy_exam_questions_without_img
-):
+def test_print_exam_without_img_questions(tmp_path, dummy_exam_questions_without_img):
     """GIVEN an Exam which questions images are not found
     THEN Exception is risen
     """
